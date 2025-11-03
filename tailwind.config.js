@@ -10,7 +10,22 @@ export default {
         inter: ["Parkinsans", "sans-serif"],
         quicksand: ["Quicksand", "sans-serif"],
       },
+      colors: {
+        primary: {
+          DEFAULT: "#000000",
+          foreground: "#FFFFFF",
+        },
+        secondary: {
+          DEFAULT: "#F3F4F6",
+          foreground: "#1F2937",
+        },
+        destructive: {
+          DEFAULT: "#EF4444",
+          foreground: "#FFFFFF",
+        },
+      },
     },
+
   },
   plugins: [],
 }

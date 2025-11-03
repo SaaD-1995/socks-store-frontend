@@ -7,17 +7,37 @@ import {
   XMarkIcon,
   UserIcon
 } from "@heroicons/react/24/outline";
+import CartSheet from "./CartSheet";
 
 const navItem = [
   { title: "New Arrivals", path: "/new-arrivals" },
   { title: "Men", path: "/men" },
   { title: "Women", path: "/women" },
   { title: "Children", path: "/children" },
-  { title: "Best Selling", path: "/collections" },
+  { title: "Collections", path: "/collections" },
+  // { title: "Best Selling", path: "/best-selling" },
   { title: "Contact", path: "/contact" },
 ];
 
+
 const Header = () => {
+    const [cartItems, setCartItems] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+    const handleAddToCart = (product) => {
+      setCartItems((prevItems) => {
+        const existingItem = prevItems.find((item) => item.id === product.id);
+        if (existingItem) {
+          return prevItems.map((item) =>
+            item.id === product.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        } else {
+          return [...prevItems, { ...product, quantity: 1 }];
+        }
+      });
+    }
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [searchBarVisible, setSearchBarVisible] = useState(false);
@@ -71,7 +91,7 @@ const Header = () => {
               <button>
                 <UserIcon className="h-6 w-6 text-gray-700 hover:text-green-500" />
               </button>
-              <button className="relative">
+              <button className="relative" onClick={() => setIsCartOpen(true)}>
                   <ShoppingCartIcon className="h-6 w-6 text-gray-700 hover:text-green-500" />
                   
                   {/* Badge */}
@@ -149,8 +169,26 @@ const Header = () => {
           onClick={() => setMenuOpen(false)}
         ></div>
       )}
+      {
+    <CartSheet
+      isOpen={isCartOpen}
+      onClose={() => setIsCartOpen(false)}
+      items={cartItems}
+      onRemoveItem={(id) =>
+        setCartItems((prevItems) => prevItems.filter((item) => item.id !== id))
+      }
+      onUpdateQuantity={(id, quantity) => {
+        setCartItems((prevItems) =>
+          prevItems.map((item) =>
+            item.id === id ? { ...item, quantity } : item
+          )
+        );
+      }}
+      onAddToCart={handleAddToCart}
 
-    </>
+    />
+    }
+  </>
   );
 };
 
