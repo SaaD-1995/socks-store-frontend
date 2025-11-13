@@ -69,7 +69,7 @@ const slides = [
 
 export default function HeroSection() {
   const navigate = useNavigate();
-  const [activeIndex, setActiveIndex] = React.useState<number>(0);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
 
   return (
     <section className="relative overflow-hidden">

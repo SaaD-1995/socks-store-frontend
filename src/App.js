@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import About from "./Pages/About";
 import ContactUs from "./Pages/ContactUs";
 import CollectionPage from "./Pages/CollectionPage";
+import Error404Page  from "./Pages/Error404Page";
 // import ProductDetailPage from "./Pages/CollectionPage";
 
 function App() {
@@ -22,9 +23,7 @@ function App() {
           <Route
             path="*"
             element={
-              <div className="text-center mt-20 text-3xl">
-                404 - Page Not Found
-              </div>
+             <Error404Page />
             }
           />
         </Routes>
