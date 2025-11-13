@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Heart, ShoppingCart, Star, SlidersHorizontal, X, ChevronDown, Home } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { ScrollArea } from "../ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 
 interface Product {
   id: number;
@@ -191,6 +192,7 @@ interface CollectionPageProps {
 }
 
 const CollectionPage = ({ collectionName, onAddToCart }: CollectionPageProps) => {
+  const navigate = useNavigate();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
@@ -510,7 +512,7 @@ const CollectionPage = ({ collectionName, onAddToCart }: CollectionPageProps) =>
               <>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {paginatedProducts.map((product) => (
-                    <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all">
+                    <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all" onClick={() => navigate(`/products/${product.id}`)}>
                       <div className="relative aspect-square overflow-hidden bg-gray-100">
                         <img
                           src={product.image}

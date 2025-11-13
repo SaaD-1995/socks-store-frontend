@@ -1,5 +1,5 @@
 
-import HeroSection from "../components/Home/HeroSection.jsx";
+import HeroSection from "../components/Home/HeroSection";
 // import Category from "../components/Home/Category.jsx";
 import CategoryCard from "../components/Home/CategoryCard";
 import ProductCard from "../components/Home/ProductCard";
@@ -112,7 +112,7 @@ const HomePage = () => {
               <h3 className="text-3xl mb-2">Featured Socks</h3>
               <p className="text-gray-600">Our most popular styles on sale</p>
             </div>
-            <Button variant="outline" className="flex" onClick={() => navigate('/collections')}>
+            <Button variant="outline" className="flex hover:text-white hover:bg-black" onClick={() => navigate('/collections')}>
               View All
             </Button>
           </div>

@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import About from "./Pages/About";
 import ContactUs from "./Pages/ContactUs";
 import CollectionPage from "./Pages/CollectionPage";
+// import ProductDetailPage from "./Pages/CollectionPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/collections" element={<CollectionPage />} />
+          {/* <Route path="/products/:id" element={<ProductDetailPage />} /> */}
           <Route
             path="*"
             element={

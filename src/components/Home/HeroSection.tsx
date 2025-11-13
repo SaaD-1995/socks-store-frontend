@@ -9,7 +9,8 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
 import "./home.css";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const slides = [
   {
@@ -22,7 +23,7 @@ const slides = [
       "https://images.unsplash.com/photo-1651223658914-efd50e3da48e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     gradient: "from-purple-600 via-pink-600 to-blue-600",
     bgGradient: "from-purple-50 via-pink-50 to-blue-50",
-    buttonText: "Shop Now",
+    buttonText: "View Collection",
     badge: "Free Shipping Over $50",
   },
   {
@@ -35,7 +36,7 @@ const slides = [
       "https://images.unsplash.com/photo-1760177379331-a8b4311db4a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     gradient: "from-orange-600 via-red-600 to-pink-600",
     bgGradient: "from-orange-50 via-red-50 to-pink-50",
-    buttonText: "Explore Athletic",
+    buttonText: "View Sports Socks",
     badge: "Enhanced Performance",
   },
   {
@@ -48,7 +49,7 @@ const slides = [
       "https://images.unsplash.com/photo-1731936757627-f2a1ea5893e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
     gradient: "from-blue-600 via-cyan-600 to-teal-600",
     bgGradient: "from-blue-50 via-cyan-50 to-teal-50",
-    buttonText: "Shop Winter",
+    buttonText: "View Winter Socks",
     badge: "Premium Materials",
   },
   {
@@ -67,7 +68,8 @@ const slides = [
 ];
 
 export default function HeroSection() {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const navigate = useNavigate();
+  const [activeIndex, setActiveIndex] = React.useState<number>(0);
 
   return (
     <section className="relative overflow-hidden">
@@ -76,7 +78,7 @@ export default function HeroSection() {
         pagination={{ clickable: true }}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         loop
-        onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+        onSlideChange={(swiper: any) => setActiveIndex(swiper.realIndex)}
         className="h-[90vh]"
       >
         {slides.map((slide, index) => (
@@ -127,6 +129,7 @@ export default function HeroSection() {
                       className="flex gap-4 pt-4"
                     >
                       <button
+                        onClick={() => navigate(`/collections`)}
                         className={`bg-gradient-to-r ${slide.gradient} hover:opacity-90 transition-all shadow-md w-auto flex items-center text-white px-5 py-3 rounded-lg font-semibold`}
                       >
                         {slide.buttonText}

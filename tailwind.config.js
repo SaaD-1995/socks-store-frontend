@@ -23,6 +23,22 @@ export default {
           DEFAULT: "#EF4444",
           foreground: "#FFFFFF",
         },
+        muted: {
+          DEFAULT: "#6B7280",
+          foreground: "#FFFFFF",
+        },
+        accent: {
+          DEFAULT: "#10B981",
+          foreground: "#FFFFFF",
+        },
+        popover: {
+          DEFAULT: "#FFFFFF",
+          foreground: "#1F2937",
+        },
+        card: {
+          DEFAULT: "#FFFFFF",
+          foreground: "#1F2937",
+        },
       },
     },
 
