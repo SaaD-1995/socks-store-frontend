@@ -7,11 +7,13 @@ import About from "./Pages/About";
 import ContactUs from "./Pages/ContactUs";
 import CollectionPage from "./Pages/CollectionPage";
 import Error404Page  from "./Pages/Error404Page";
+import OfferHeader from "./components/OfferHeader";
 // import ProductDetailPage from "./Pages/CollectionPage";
 
 function App() {
   return (
     <>
+      <OfferHeader />
       <Header/>
       <div>
         <Routes>
