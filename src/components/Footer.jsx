@@ -106,12 +106,18 @@ const Footer = () => {
             </div>
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-gray-400">&copy; {new Date().getFullYear()} SockShop. All rights reserved.</p>
-                {/* <div className="flex gap-4 text-gray-400">
-                    <span>Visa</span>
-                    <span>Mastercard</span>
-                    <span>PayPal</span>
+                <div className="flex gap-4 text-gray-400">
+                    <div className="w-12">
+                        <img src="/visa.png" alt="" />
+                    </div>
+                    <div className="w-12">
+                        <img src="/new-Jazzcash-logo.png" alt="Jazzcash" />
+                    </div>
+                    <div className="w-11">
+                        <img src="/easypaisa-logo.png" alt="EssayPaisa" />
+                    </div>
                     <span>Apple Pay</span>
-                </div> */}
+                </div>
             </div>
          </div>
     </footer>

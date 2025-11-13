@@ -155,7 +155,7 @@ function ContactUs() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="h-full hover:shadow-lg transition-all duration-300 border-0">
+                <Card className="h-full hover:shadow-lg transition-all duration-500 hover:border border-0">
                   <CardContent className="p-6">
                     <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${method.gradient} flex items-center justify-center mb-4`}>
                       <method.icon className="w-6 h-6 text-white" />
