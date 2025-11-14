@@ -186,12 +186,12 @@ const allProducts: Product[] = [
   }
 ];
 
-interface CollectionPageProps {
-  collectionName: string;
-  onAddToCart: (product: Product) => void;
-}
-
-const CollectionPage = ({ collectionName, onAddToCart }: CollectionPageProps) => {
+// interface CollectionPageProps {
+//   collectionName: string;
+//   onAddToCart: (product: Product) => void;
+// }
+// { collectionName, onAddToCart }: CollectionPageProps
+const CollectionPage = () => {
   const navigate = useNavigate();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -374,12 +374,12 @@ const CollectionPage = ({ collectionName, onAddToCart }: CollectionPageProps) =>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-gray-900">{collectionName}</BreadcrumbPage>
+                <BreadcrumbPage className="text-gray-900"></BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           
-          <h1 className="text-gray-900 mb-4">{collectionName} Collection</h1>
+          <h1 className="text-gray-900 mb-4">Collection</h1>
           <p className="text-gray-600 max-w-2xl">
             Explore our curated selection of premium socks designed for comfort, style, and durability.
           </p>
@@ -536,8 +536,9 @@ const CollectionPage = ({ collectionName, onAddToCart }: CollectionPageProps) =>
 
                         <Button
                           className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-purple-600 hover:bg-purple-700"
-                          onClick={() => onAddToCart(product)}
+                          onClick={() => {}}
                         >
+                          {/* onAddToCart(product) */}
                           <ShoppingCart className="h-4 w-4 mr-2" />
                           Add to Cart
                         </Button>

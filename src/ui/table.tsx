@@ -1,0 +1,205 @@
+"use client";
+
+import * as React from "react";
+
+import { cn } from "./utils";
+import { Button } from "./button";
+import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "./select";
+type TablePaginationProps = {
+  totalItems: number;
+  page: number;
+  pageSize: number;
+  onPageChange: (p: number) => void;
+  onPageSizeChange: (s: number) => void;
+  className?: string;
+};
+
+function Table({ className, ...props }: React.ComponentProps<"table">) {
+  return (
+    <div
+      data-slot="table-container"
+      className="relative w-full overflow-x-auto"
+    >
+      <table
+        data-slot="table"
+        className={cn("w-full caption-bottom text-sm", className)}
+        {...props}
+      />
+    </div>
+  );
+}
+
+function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
+  return (
+    <thead
+      data-slot="table-header"
+      className={cn("[&_tr]:border-b", className)}
+      {...props}
+    />
+  );
+}
+
+function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+  return (
+    <tbody
+      data-slot="table-body"
+      className={cn("[&_tr:last-child]:border-0", className)}
+      {...props}
+    />
+  );
+}
+
+function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
+  return (
+    <tfoot
+      data-slot="table-footer"
+      className={cn(
+        "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+  return (
+    <tr
+      data-slot="table-row"
+      className={cn(
+        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+  return (
+    <th
+      data-slot="table-head"
+      className={cn(
+        "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+  return (
+    <td
+      data-slot="table-cell"
+      className={cn(
+        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+function TableCaption({
+  className,
+  ...props
+}: React.ComponentProps<"caption">) {
+  return (
+    <caption
+      data-slot="table-caption"
+      className={cn("text-muted-foreground mt-4 text-sm", className)}
+      {...props}
+    />
+  );
+};
+// make functions for pagination components like TablePagination, TablePaginationNext, TablePaginationPrevious, TablePaginationEllipsis
+
+function TablePagination({
+  totalItems,
+  page,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  className,
+  ...props
+}: TablePaginationProps) {
+  const pageSizes = [10, 20, 30, 50, 100, 250];
+
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  if (totalItems <= 10) {
+    return null; 
+  }
+
+  function gotoPage(p: number) {
+    if (p < 1) p = 1;
+    if (p > totalPages) p = totalPages;
+    onPageChange(p);
+  }
+
+  return (
+    <div
+      data-slot="table-pagination"
+      className={cn("flex items-center justify-end mt-4 w-full", className)}
+      {...props}
+    >
+      {/* LEFT SIDE — Page Size Dropdown */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm">Rows per page:</span>
+        <Select
+          value={pageSize.toString()}
+          onValueChange={(value) => onPageSizeChange(Number(value))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={pageSize.toString()} />
+          </SelectTrigger>
+          <SelectContent>
+          {pageSizes.map((size) => (
+            <SelectItem key={size} value={size.toString()}>
+              {size}
+            </SelectItem>
+          ))}
+          </SelectContent>
+        </Select>
+
+        <span className="text-muted-foreground text-sm">
+          {totalItems} items
+        </span>
+      </div>
+
+      {/* RIGHT SIDE — Pagination Controls */}
+      <div className="flex items-center gap-3">
+        <Button
+          onClick={() => gotoPage(page - 1)}
+          disabled={page === 1}
+          variant="secondary"
+        >
+          Prev
+        </Button>
+        <span className="text-sm">
+          Page {page} of {totalPages}
+        </span>
+        <Button
+          onClick={() => gotoPage(page + 1)}
+          disabled={page === totalPages}
+          variant="secondary"
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+  TablePagination,
+};

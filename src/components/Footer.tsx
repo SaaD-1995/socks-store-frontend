@@ -1,5 +1,6 @@
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Button } from "../ui/button";
 // import { Separator } from "../ui/separator.jsx";
 const Footer = () => {
     const companyItems= [{
@@ -50,18 +51,18 @@ const Footer = () => {
                     Your premier destination for premium socks. Quality, comfort, and style in every step.
                     </p>
                     <div className="flex gap-4">
-                    <button variant="ghost" size="icon" className="hover:text-purple-400">
+                    <Button variant="ghost" size="icon" className="hover:text-purple-400">
                         <Facebook className="h-5 w-5" />
-                    </button>
-                    <button variant="ghost" size="icon" className="hover:text-purple-400">
+                    </Button>
+                    <Button variant="ghost" size="icon" className="hover:text-purple-400">
                         <Instagram className="h-5 w-5" />
-                    </button>
-                    <button variant="ghost" size="icon" className="hover:text-purple-400">
+                    </Button>
+                    <Button variant="ghost" size="icon" className="hover:text-purple-400">
                         <Twitter className="h-5 w-5" />
-                    </button>
-                    <button variant="ghost" size="icon" className="hover:text-purple-400">
+                    </Button>
+                    <Button variant="ghost" size="icon" className="hover:text-purple-400">
                         <Youtube className="h-5 w-5" />
-                    </button>
+                    </Button>
                     </div>
                 </div>
 

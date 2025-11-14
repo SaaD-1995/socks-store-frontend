@@ -1,0 +1,124 @@
+import { ReactNode } from "react";
+import { 
+  LayoutDashboard, 
+  Package, 
+  Image as ImageIcon, 
+  ShoppingCart, 
+  Users, 
+  Settings,
+  LogOut,
+  Menu,
+  X
+} from "lucide-react";
+import { Button } from "../../ui/button";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+
+interface AdminLayoutProps {
+  children: ReactNode;
+  currentPage: string;
+  onNavigate: (page: string) => void;
+  onLogout?: () => void;
+}
+
+function AdminLayout({ children, currentPage, onNavigate, onLogout }: AdminLayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const menuItems = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "products", label: "Products", icon: Package },
+    { id: "sliders", label: "Sliders", icon: ImageIcon },
+    { id: "orders", label: "Orders", icon: ShoppingCart },
+    { id: "customers", label: "Customers", icon: Users },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile Header */}
+      <div className="lg:hidden bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+        <h2 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          SockShop Admin
+        </h2>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+      </div>
+
+      {/* Sidebar */}
+      <AnimatePresence>
+        {(sidebarOpen || window.innerWidth >= 1024) && (
+          <motion.aside
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ type: "spring", damping: 20 }}
+            className="fixed left-0 top-0 h-full w-64 bg-white border-r z-50 lg:z-30"
+          >
+            <div className="p-6">
+              <h2 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                SockShop Admin
+              </h2>
+            </div>
+
+            <nav className="px-3 space-y-1">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = currentPage === item.id;
+                
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      onNavigate(item.id);
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                      isActive
+                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={onLogout}
+              >
+                <LogOut className="h-5 w-5 mr-3" />
+                Logout
+              </Button>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Main Content */}
+      <div className="lg:ml-64">
+        <main className="p-4 lg:p-8">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+export default AdminLayout;
