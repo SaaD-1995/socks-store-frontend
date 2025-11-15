@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+
+import { Link, useNavigate } from "react-router-dom";
 import {
   MagnifyingGlassIcon,
   ShoppingCartIcon,
@@ -39,7 +40,7 @@ const navItem = [
 
 
 const Header = () => {
-
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = React.useState<Array<any>>([]);
   const [isCartOpen, setIsCartOpen] = React.useState<boolean>(false);
   const [activeDropdown, setActiveDropdown] = React.useState<number | null>(null);
@@ -135,7 +136,7 @@ const Header = () => {
                       transition-all duration-[0.5s] ease-in-out text-gray-500"
               />
               </div>
-              <button className="relative" onClick={() => {}}>
+              <button className="relative" onClick={() => {navigate("/login")}}>
                 <UserIcon className="h-6 w-6 text-gray-700 hover:text-purple-600 transition-colors" />
               </button>
               <button className="relative" onClick={() => setIsCartOpen(true)}>

@@ -4,20 +4,23 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
+import { useNavigate } from "react-router-dom";
 
-interface LoginPageProps {
-  onLogin: (userType: "user" | "admin") => void;
-  onNavigateToSignup: () => void;
-  onNavigateHome: () => void;
-  isAdminLogin?: boolean;
-}
 
-export function LoginPage({ onLogin, onNavigateToSignup, onNavigateHome, isAdminLogin = false }: LoginPageProps) {
+export function LoginPage() {
+  const navigate = useNavigate();
+  const isAdminLogin = false;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-
+  const onLogin = (role: "admin" | "user") => {
+    if (role === "admin") {
+      window.location.href = "/admin";
+    } else {
+      window.location.href = "/";
+    }
+  };
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // Mock validation - in production, validate with backend
@@ -41,7 +44,7 @@ export function LoginPage({ onLogin, onNavigateToSignup, onNavigateHome, isAdmin
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <button
-            onClick={onNavigateHome}
+            onClick={() => window.location.href = "/"}
             className="inline-block"
           >
             <h1 className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent mb-2">
@@ -53,12 +56,12 @@ export function LoginPage({ onLogin, onNavigateToSignup, onNavigateHome, isAdmin
 
         <Card className="border-0 shadow-2xl">
           <CardHeader>
-            <CardTitle>{isAdminLogin ? "Admin Login" : "Login"}</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-center text-2xl font-medium">{isAdminLogin ? "Admin Login" : "Login"}</CardTitle>
+            {/* <CardDescription>
               {isAdminLogin 
                 ? "Admin access only - Authorized personnel" 
                 : "Enter your credentials to continue"}
-            </CardDescription>
+            </CardDescription> */}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -80,7 +83,7 @@ export function LoginPage({ onLogin, onNavigateToSignup, onNavigateHome, isAdmin
                     placeholder={isAdminLogin ? "admin@sockshop.com" : "you@example.com"}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="pl-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     required
                   />
                 </div>
@@ -96,7 +99,7 @@ export function LoginPage({ onLogin, onNavigateToSignup, onNavigateHome, isAdmin
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="pl-10 pr-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     required
                   />
                   <button
@@ -152,7 +155,7 @@ export function LoginPage({ onLogin, onNavigateToSignup, onNavigateHome, isAdmin
                     Don't have an account?{" "}
                     <button
                       type="button"
-                      onClick={onNavigateToSignup}
+                      onClick={()=> navigate("/signup")}
                       className="text-purple-600 hover:text-purple-700"
                     >
                       Sign up
@@ -165,14 +168,14 @@ export function LoginPage({ onLogin, onNavigateToSignup, onNavigateHome, isAdmin
         </Card>
 
         {/* Back to home link */}
-        <div className="text-center mt-6">
+        {/* <div className="text-center mt-6">
           <button
             onClick={onNavigateHome}
             className="text-gray-600 hover:text-gray-900"
           >
             ← Back to Home
           </button>
-        </div>
+        </div> */}
       </motion.div>
     </div>
   );

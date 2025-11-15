@@ -19,6 +19,7 @@ import AdminSliders from "./components/admin/AdminSilder";
 import AdminCustomers from "./components/admin/AdminCustomer";
 import AdminSettings from "./components/admin/AdminSetting";
 import LoginPage from "./Pages/LoginPage";
+import SignupPage from "./Pages/SignUpPage";
 type AdminPage = "dashboard" | "products" | "sliders" | "orders" | "customers" | "settings";
 function App() {
   const [adminPage, setAdminPage] = useState<AdminPage>("dashboard");
@@ -38,10 +39,8 @@ function App() {
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/collections" element={<CollectionPage  />} />
           {/* <Route path="/products/:id" element={<ProductDetailPage />} /> */}
-          <Route path="/login" element={<LoginPage
-  onLogin={() => {}} onNavigateToSignup={() => {}} onNavigateHome={() => {}}
-  
-           />} />
+          <Route path="/login" element={<LoginPage />}/>
+          <Route path="/signup" element={<SignupPage />} />
           <Route
             path="*"
             element={
