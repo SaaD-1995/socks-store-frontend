@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { Link, Route, Routes,useLocation  } from "react-router-dom";
 import { 
   LayoutDashboard, 
@@ -37,9 +36,12 @@ function AdminLayout() {
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Header */}
       <div className="lg:hidden bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-50">
-        <h2 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        {/* <h2 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
           SockShop Admin
-        </h2>
+        </h2> */}
+        <Link to="/">
+          <img src="logo2.png" alt="capri Logo" className="w-[75px] md:w-28" />
+        </Link>
         <Button
           variant="ghost"
           size="icon"
@@ -60,9 +62,12 @@ function AdminLayout() {
             className="fixed left-0 top-0 h-full w-64 bg-white border-r z-50 lg:z-30"
           >
             <div className="p-6">
-              <h2 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              {/* <h2 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 SockShop Admin
-              </h2>
+              </h2> */}
+              <Link to="/">
+                <img src="logo2.png" alt="capri Logo" className="w-[75px] md:w-28" />
+              </Link>
             </div>
 
             <nav className="px-3 space-y-1">

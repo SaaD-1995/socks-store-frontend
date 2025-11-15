@@ -42,27 +42,27 @@ const navItem = [
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [cartItems, setCartItems] = React.useState<Array<any>>([]);
-  const [isCartOpen, setIsCartOpen] = React.useState<boolean>(false);
-  const [activeDropdown, setActiveDropdown] = React.useState<number | null>(null);
+  const [cartItems, setCartItems] = useState<Array<any>>([]);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
 
-  const handleAddToCart = (product:any) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        return [...prevItems, { ...product, quantity: 1 }];
-      }
-    });
-  }
-  const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
-  const [searchValue, setSearchValue] = React.useState<string>("");
-  const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(false);
+  // const handleAddToCart = (product:any) => {
+  //   setCartItems((prevItems) => {
+  //     const existingItem = prevItems.find((item) => item.id === product.id);
+  //     if (existingItem) {
+  //       return prevItems.map((item) =>
+  //         item.id === product.id
+  //           ? { ...item, quantity: item.quantity + 1 }
+  //           : item
+  //       );
+  //     } else {
+  //       return [...prevItems, { ...product, quantity: 1 }];
+  //     }
+  //   });
+  // }
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [searchBarVisible, setSearchBarVisible] = useState<boolean>(false);
   const onSeacrh = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     setSearchValue(e.target.value);

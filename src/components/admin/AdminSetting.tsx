@@ -6,10 +6,8 @@ import {
   Mail, 
   CreditCard, 
   Truck, 
-  Globe, 
   Bell,
   Search as SearchIcon,
-  Lock,
   Palette
 } from "lucide-react";
 import { Button } from "../../ui/button";
