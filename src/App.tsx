@@ -8,16 +8,16 @@ import ContactUs from "./Pages/ContactUs";
 import CollectionPage from "./Pages/CollectionPage";
 import Error404Page  from "./Pages/Error404Page";
 import OfferHeader from "./components/OfferHeader";
-import AdminDashboard from "./components/admin/AdminDashboard";
+// import AdminDashboard from "./components/admin/AdminDashboard";
 import ProtectedAdminRoute from "./Pages/Admin/ProtectedAdminRoute";
 import AdminLayout from "./Pages/Admin/AdminLayout";
 import { useState } from "react";
-import AdminProducts from "./components/admin/AdminProduct";
-// import ProductDetailPage from "./Pages/CollectionPage";
-import AdminOrders from './components/admin/AdminOrder.';
-import AdminSliders from "./components/admin/AdminSilder";
-import AdminCustomers from "./components/admin/AdminCustomer";
-import AdminSettings from "./components/admin/AdminSetting";
+// import AdminProducts from "./components/admin/AdminProduct";
+// // import ProductDetailPage from "./Pages/CollectionPage";
+// import AdminOrders from './components/admin/AdminOrder.';
+// import AdminSliders from "./components/admin/AdminSilder";
+// import AdminCustomers from "./components/admin/AdminCustomer";
+// import AdminSettings from "./components/admin/AdminSetting";
 import LoginPage from "./Pages/LoginPage";
 import SignupPage from "./Pages/SignUpPage";
 type AdminPage = "dashboard" | "products" | "sliders" | "orders" | "customers" | "settings";
@@ -48,22 +48,10 @@ function App() {
             }
           />
           <Route
-            path="/admin"
+            path="/admin/*"
             element={
               <ProtectedAdminRoute>
-                <AdminLayout  
-                  currentPage={adminPage}
-                   onNavigate={(page) => setAdminPage(page as AdminPage)}
-                  onLogout={() => {}}
-      
-                >
-                  {adminPage === "dashboard" && <AdminDashboard />}
-                  {adminPage === "products" && <AdminProducts />}
-                  {adminPage === "orders" && <AdminOrders />}
-                  {adminPage === "sliders" && <AdminSliders />}
-                  {adminPage === "customers" && <AdminCustomers />}
-                  {adminPage === "settings" && <AdminSettings />}
-                </AdminLayout>
+                <AdminLayout />
               </ProtectedAdminRoute>
             }
           />

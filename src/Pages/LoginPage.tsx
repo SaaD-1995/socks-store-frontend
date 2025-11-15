@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const isAdminLogin = false;
+  const isAdminLogin = true;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,6 +31,8 @@ export function LoginPage() {
         onLogin("user");
       }
     }
+   console.log("Login attempted with:", { email, password, rememberMe });
+    
   };
 
   return (

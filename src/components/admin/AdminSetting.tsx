@@ -128,31 +128,31 @@ function AdminSettings() {
         <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 h-auto gap-2">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Store className="h-4 w-4" />
-            <span className="hidden sm:inline">General</span>
+            <span className="inline">General</span>
           </TabsTrigger>
           <TabsTrigger value="email" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
-            <span className="hidden sm:inline">Email</span>
+            <span className="inline">Email</span>
           </TabsTrigger>
           <TabsTrigger value="payment" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
-            <span className="hidden sm:inline">Payment</span>
+            <span className="inline">Payment</span>
           </TabsTrigger>
           <TabsTrigger value="shipping" className="flex items-center gap-2">
             <Truck className="h-4 w-4" />
-            <span className="hidden sm:inline">Shipping</span>
+            <span className="inline">Shipping</span>
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="h-4 w-4" />
-            <span className="hidden sm:inline">Notifications</span>
+            <span className="inline">Notifications</span>
           </TabsTrigger>
           <TabsTrigger value="seo" className="flex items-center gap-2">
             <SearchIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">SEO</span>
+            <span className="inline">SEO</span>
           </TabsTrigger>
           <TabsTrigger value="appearance" className="flex items-center gap-2">
             <Palette className="h-4 w-4" />
-            <span className="hidden sm:inline">Appearance</span>
+            <span className="inline">Appearance</span>
           </TabsTrigger>
         </TabsList>
 

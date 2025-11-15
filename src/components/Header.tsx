@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   MagnifyingGlassIcon,
   ShoppingCartIcon,
@@ -41,6 +41,7 @@ const navItem = [
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [cartItems, setCartItems] = React.useState<Array<any>>([]);
   const [isCartOpen, setIsCartOpen] = React.useState<boolean>(false);
   const [activeDropdown, setActiveDropdown] = React.useState<number | null>(null);
@@ -70,27 +71,44 @@ const Header = () => {
   const showSearchBar = () => {
     setSearchBarVisible(true);
   }
+  const closeSideItem = () => {
+    setTimeout(() => {
+      setMenuOpen(false);
+    }, 1000);
+  }
   return (
     <> 
-      <header className="header sticky top-0 bg-white shadow-md px-6 py-2 z-20">
-        <div className="flex items-center justify-between px-6 py-3 md:px-8">
+      <header className="header sticky top-0 bg-white shadow-md px-2 md:px-6 py-2 z-20">
+        <div className="flex items-center justify-between px-1 py-3 md:px-8">
           {/* Centered Logo on mobile */}
           <div className="flex justify-center md:justify-start">
             <Link to="/">
-              <img src="logo192.png" alt="logo" className="w-10" />
+              <img src="logo2.png" alt="logo" className="md:w-28 w-[75px]" />
             </Link>
           </div>
           <nav className="hidden md:flex flex-1 text-md justify-start ms-20 relative">
             <ul className="flex items-center space-x-6">
-              {navItem.map((item, index) => (
+              {navItem.map((item, index) =>{
+              const isActive = location.pathname === item.path;
+              return(
                 <li
                   key={index}
                   className="relative group"
                   onMouseEnter={() => setActiveDropdown(index)}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <div className="flex items-center space-x-1 text-gray-700 hover:text-purple-600 transition-colors cursor-pointer">
-                    <Link to={item.path}>{item.title}</Link>
+                  <div className={   `flex items-center space-x-1 cursor-pointer py-2 ${
+                    isActive ? "text-purple-600 font-medium" : "text-gray-700 transition-colors  hover:border-purple-600"
+                  }`}>
+                    <Link to={item.path}>
+                    <span>{item.title}</span>
+                    <div  
+                      className={`
+                        h-[1.7px] bg-gray-600 rounded-full transition-all duration-300
+                        ${isActive ? "w-full bg-purple-600" : "w-0 group-hover:w-full"}
+                      `} >
+                    </div>
+                    </Link>
                     {item.dropdown && (
                       <ChevronDownIcon
                         className={`w-3 h-3 transition-all duration-700 font-medium ${
@@ -116,7 +134,7 @@ const Header = () => {
                     </ul>
                   )}
                 </li>
-              ))}
+              )})}
             </ul>
           </nav>
           {/* Right Icons */}
@@ -152,7 +170,7 @@ const Header = () => {
                 className="md:hidden z-50 relative"
                 onClick={() => setMenuOpen(true)}
               >
-                <Bars3BottomLeftIcon className="h-7 w-7 text-gray-700" />
+                <Bars3BottomLeftIcon className="h-7 w-7 text-gray-700 ms-2" />
               </button>
           </div>
         </div>
@@ -182,33 +200,72 @@ const Header = () => {
       )}
       {/* Sidebar (Mobile / Tablet) */}
       <div
-        className={`fixed top-0 right-0 h-full w-[80%] bg-white shadow-lg z-30 transform ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300 ease-in-out`}
-      >
-        {/* Sidebar Header */}
-        <div className="flex justify-between items-center px-6 py-4 border-b">
-          <img src="logo192.png" alt="logo" className="w-8" />
-          <button onClick={() => setMenuOpen(false)}>
-            <XMarkIcon className="h-6 w-6 text-gray-700" />
-          </button>
-        </div>
+          className={`fixed top-0 right-0 h-full w-[80%] bg-white shadow-lg z-30 transform ${
+            menuOpen ? "translate-x-0" : "translate-x-full"
+          } transition-transform duration-300 ease-in-out`}
+        >
+          {/* Sidebar Header */}
+          <div className="flex justify-between items-center px-6 py-4 border-b">
+            <Link to="/" onClick={() => closeSideItem()}>
+                <img src="logo2.png"  alt="logo" className="md:w-28 w-[75px]" />
+            </Link>
+            <button onClick={() => setMenuOpen(false)}>
+              <XMarkIcon className="h-6 w-6 text-gray-700" />
+            </button>
+          </div>
 
-        {/* Navigation Links */}
-        <ul className="flex flex-col mt-4 space-y-3 px-6">
-          {navItem.map((item, index) => (
-            <li key={index}>
-              <Link
-                to={item.path}
-                className="block py-2 text-gray-700 hover:text-green-500"
-                onClick={() => setMenuOpen(false)} // Close menu on click
-              >
-                {item.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+          {/* Navigation Links */}
+          <ul className="flex flex-col mt-4 space-y-3 px-6">
+            {navItem.map((item, index) => {
+              const isActive = location.pathname === item.path;
+              
+              return (
+                <li key={index} className="relative" onClick={() => closeSideItem()}>
+                  
+                  {/* CLICK → open dropdown */}
+                  <div
+                    className={`flex items-center justify-between cursor-pointer py-2 ${
+                      isActive ? "text-purple-600 font-medium" : "text-gray-700"
+                    }`}
+                    onClick={() =>
+                      item.dropdown &&
+                      setActiveDropdown(activeDropdown === index ? null : index)
+                    }
+                  >
+                    <Link to={item.path} className="flex-1">
+                      <span>{item.title}</span>
+                    </Link>
+
+                    {item.dropdown && (
+                      <ChevronDownIcon
+                        className={`w-4 h-4 ml-2 transition-transform duration-300 ${
+                          activeDropdown === index ? "rotate-180 text-purple-600" : ""
+                        }`}
+                      />
+                    )}
+                  </div>
+
+                  {/* Dropdown Items */}
+                  {item.dropdown && activeDropdown === index && (
+                    <ul className="ml-4 mt-2 space-y-1 bg-gray-50 rounded-lg p-2">
+                      {item.dropdown.map((subItem, subIndex) => (
+                        <li key={subIndex}>
+                          <Link
+                            to={subItem.path}
+                            className="block px-3 py-2 text-gray-700 hover:text-purple-700 hover:bg-purple-100 rounded"
+                            onClick={() => setMenuOpen(false)} // close menu on click
+                          >
+                            {subItem.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
 
       {/* Overlay (when sidebar is open) */}
       {menuOpen && (

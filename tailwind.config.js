@@ -39,6 +39,15 @@ export default {
           DEFAULT: "#FFFFFF",
           foreground: "#1F2937",
         },
+        purple: {
+          600: "#8B5CF6",
+        },
+        pink: {
+          600: "#EC4899",
+        },
+        black: {
+          900: "#000000",
+        },
       },
     },
 

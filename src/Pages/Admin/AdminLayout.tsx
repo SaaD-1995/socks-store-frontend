@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { Link, Route, Routes,useLocation  } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Package, 
@@ -13,24 +14,23 @@ import {
 import { Button } from "../../ui/button";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import AdminDashboard from "../../components/admin/AdminDashboard";
+import { AdminProducts } from "../../components/admin/AdminProduct";
+import AdminSliders from "../../components/admin/AdminSilder";
+import AdminOrders from "../../components/admin/AdminOrder.";
+import { AdminCustomers } from "../../components/admin/AdminCustomer";
+import AdminSettings from "../../components/admin/AdminSetting";
 
-interface AdminLayoutProps {
-  children: ReactNode;
-  currentPage: string;
-  onNavigate: (page: string) => void;
-  onLogout?: () => void;
-}
-
-function AdminLayout({ children, currentPage, onNavigate, onLogout }: AdminLayoutProps) {
+function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const location = useLocation();
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "products", label: "Products", icon: Package },
-    { id: "sliders", label: "Sliders", icon: ImageIcon },
-    { id: "orders", label: "Orders", icon: ShoppingCart },
-    { id: "customers", label: "Customers", icon: Users },
-    { id: "settings", label: "Settings", icon: Settings },
+    { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/admin/products", label: "Products", icon: Package },
+    { to: "/admin/sliders", label: "Sliders", icon: ImageIcon },
+    { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
+    { to: "/admin/customers", label: "Customers", icon: Users },
+    { to: "/admin/settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -68,13 +68,12 @@ function AdminLayout({ children, currentPage, onNavigate, onLogout }: AdminLayou
             <nav className="px-3 space-y-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = currentPage === item.id;
-                
+                const isActive = location.pathname === item.to;
                 return (
-                  <button
-                    key={item.id}
+                  <Link
+                    key={item.label}
+                    to={item.to}
                     onClick={() => {
-                      onNavigate(item.id);
                       setSidebarOpen(false);
                     }}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
@@ -85,7 +84,7 @@ function AdminLayout({ children, currentPage, onNavigate, onLogout }: AdminLayou
                   >
                     <Icon className="h-5 w-5" />
                     <span>{item.label}</span>
-                  </button>
+                  </Link>
                 );
               })}
             </nav>
@@ -94,7 +93,10 @@ function AdminLayout({ children, currentPage, onNavigate, onLogout }: AdminLayou
               <Button
                 variant="ghost"
                 className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                onClick={onLogout}
+                onClick={() => {
+                  // Handle logout logic here
+
+                }}
               >
                 <LogOut className="h-5 w-5 mr-3" />
                 Logout
@@ -115,7 +117,14 @@ function AdminLayout({ children, currentPage, onNavigate, onLogout }: AdminLayou
       {/* Main Content */}
       <div className="lg:ml-64">
         <main className="p-4 lg:p-8">
-          {children}
+          <Routes>
+            <Route path="" element={<AdminDashboard />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="sliders" element={<AdminSliders />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="customers" element={<AdminCustomers />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Routes>
         </main>
       </div>
     </div>
