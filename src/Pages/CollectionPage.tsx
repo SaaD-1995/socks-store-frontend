@@ -9,10 +9,12 @@ import { Slider } from "../ui/silder";
 import { Checkbox } from "../ui/checkbox";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Heart, ShoppingCart, Star, SlidersHorizontal, X, ChevronDown, Home } from "lucide-react";
+import { Heart, ShoppingCart, Star, SlidersHorizontal, X, Home, Eye } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { ScrollArea } from "../ui/scroll-area";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface Product {
   id: number;
@@ -510,9 +512,9 @@ const CollectionPage = () => {
               </div>
             ) : (
               <>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                   {paginatedProducts.map((product) => (
-                    <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all" onClick={() => navigate(`/products/${product.id}`)}>
+                    <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all" >
                       <div className="relative aspect-square overflow-hidden bg-gray-100">
                         <img
                           src={product.image}
@@ -545,8 +547,23 @@ const CollectionPage = () => {
                       </div>
 
                       <CardContent className="p-4 space-y-3">
-                        <h3 className="text-gray-900 line-clamp-2">{product.name}</h3>
-
+                        <div className="flex items-center justify-between">
+                        <h3 className="text-gray-900 font-medium">{product.name}</h3>
+                        <Link to={`/products/${product.id}`}>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="text-gray-600 hover:text-gray-800 text-sm transition-all duration-300">
+                                  <Eye className="h-4 w-4 inline-block mr-1" />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                View Details
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Link>
+                        </div>
                         <div className="flex items-center gap-2">
                           <div className="flex items-center">
                             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />

@@ -8,18 +8,13 @@ import ContactUs from "./Pages/ContactUs";
 import CollectionPage from "./Pages/CollectionPage";
 import Error404Page  from "./Pages/Error404Page";
 import OfferHeader from "./components/OfferHeader";
-// import AdminDashboard from "./components/admin/AdminDashboard";
 import ProtectedAdminRoute from "./Pages/Admin/ProtectedAdminRoute";
 import AdminLayout from "./Pages/Admin/AdminLayout";
 import { useState } from "react";
-// import AdminProducts from "./components/admin/AdminProduct";
-// // import ProductDetailPage from "./Pages/CollectionPage";
-// import AdminOrders from './components/admin/AdminOrder.';
-// import AdminSliders from "./components/admin/AdminSilder";
-// import AdminCustomers from "./components/admin/AdminCustomer";
-// import AdminSettings from "./components/admin/AdminSetting";
+import ProductDetailPage from "./Pages/ProductDetailPage";
 import LoginPage from "./Pages/LoginPage";
 import SignupPage from "./Pages/SignUpPage";
+import { Product } from './components/Home/ProductCard';
 type AdminPage = "dashboard" | "products" | "sliders" | "orders" | "customers" | "settings";
 function App() {
   const [adminPage, setAdminPage] = useState<AdminPage>("dashboard");
@@ -38,7 +33,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/collections" element={<CollectionPage  />} />
-          {/* <Route path="/products/:id" element={<ProductDetailPage />} /> */}
+          <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/login" element={<LoginPage />}/>
           <Route path="/signup" element={<SignupPage />} />
           <Route

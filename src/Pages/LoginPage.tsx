@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const isAdminLogin = true;
+  const isAdminLogin = false;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
