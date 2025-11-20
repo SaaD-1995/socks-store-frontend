@@ -30,7 +30,7 @@ import { toast } from "sonner";
 import productApi from "../../api/productApi";
 type SocksType = "male" | "female" | "kids";
 interface Product {
-  id: string;
+ _id: string;
   title: string;
   category: string;
   price: number;
@@ -38,11 +38,11 @@ interface Product {
   images: string[];
   status: boolean;
   socksType: SocksType;
-  description?: string;
+  description: string;
 }
 
 export function AdminProducts() {
-  const {getAllProducts, createProduct} = productApi;
+  const {getAllProducts, createProduct, updateProduct, deleteProduct} = productApi;
   const [products, setProducts] = useState<Product[]>([
     // {
     //   id: 1,
@@ -93,7 +93,6 @@ export function AdminProducts() {
     try {
       const response = await getAllProducts();
       setProducts(response.data);
-      console.log("Fetched products:", response.data);
     } catch (error) {
       console.error("Failed to fetch products:", error);
     }
@@ -141,29 +140,46 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
     e.preventDefault();
     
     if (editingProduct) {
-      // Update existing product
       setProducts(products.map(p => 
-        p.id === editingProduct.id 
+        p._id === editingProduct._id 
           ? { 
               ...p, 
               ...formData, 
-              price: parseFloat(formData.price), 
-              stock: parseInt(formData.stock),
-              socksType: (formData.socksType as string).toLowerCase() as SocksType,
+              price: formData.price ? parseFloat(formData.price) : p.price, 
+              stock: formData.stock ? parseInt(formData.stock) : p.stock,
+              socksType: formData.socksType === "Male" ? "male" : formData.socksType === "Female" ? "female" : "kids",
               status: formData.status === "Active" ? true : false
             }
           : p
       ));
+      // Update existing product
+      const updatedProduct: Product = {
+        _id: editingProduct._id,
+        title: formData.title,
+        category: formData.category,
+        price: formData.price ? parseFloat(formData.price) : 0,
+        stock: formData.stock ? parseInt(formData.stock) : 0,
+        description: formData.description,
+        status: formData.status === "Active" ? true : false,
+        socksType: formData.socksType === "Male" ? "male" : formData.socksType === "Female" ? "female" : "kids",
+        images: formData.image ? [formData.image] : [""]
+      };
+      const response = await updateProduct(editingProduct._id, updatedProduct);
+      if (response && response.data) {
+        setProducts(products.map(p => p._id === editingProduct._id ? response.data : p));
+      }
+      alert('Product updated successfully!');
       toast.success("Product updated successfully!");
     } else {
       // Add new product
-      const newProduct: Omit<Product, "id"> = {
+      const newProduct: Omit<Product, "_id"> = {
         title: formData.title,
         category: formData.category,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         images: formData.image ? [formData.image] : [""],
         status: formData.status === "Active" ? true : false,
+        description: formData.description,
         socksType: (formData.socksType as string).toLowerCase() as SocksType 
       };
       const response = await createProduct(newProduct);
@@ -193,13 +209,14 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
       image: product.images[0] || "",
       description: "",
       status: product.status === true ? "Active" : "Draft", 
-      socksType: product.socksType.charAt(0).toUpperCase() + product.socksType.slice(1) as "Male" | "Female" | "Kids"
+      socksType: product.socksType === "male" ? "Male" : product.socksType === "female" ? "Female" : "Kids"
     });
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setProducts(products.filter(p => p.id !== id));
+  const handleDelete = async (id: string) => {
+    await deleteProduct(id);
+    setProducts(products.filter(p => p._id !== id));
     toast.success("Product deleted successfully!");
   };
 
@@ -410,7 +427,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
               <TableBody>
                 {filteredProducts.map((product, index) => (
                   <motion.tr
-                    key={product.id}
+                    key={product._id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: index * 0.05 }}
@@ -451,7 +468,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDelete(product._id)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4" />
