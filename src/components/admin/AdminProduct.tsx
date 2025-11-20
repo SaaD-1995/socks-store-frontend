@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState} from "react";
 import { motion } from "motion/react";
 import { Plus, Pencil, Trash2, Search, Filter } from "lucide-react";
 import { Button } from "../../ui/button";
@@ -27,96 +27,156 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { toast } from "sonner";
-import { Label } from "recharts/types/component/Label";
-
+import productApi from "../../api/productApi";
+type SocksType = "male" | "female" | "kids";
 interface Product {
-  id: number;
-  name: string;
+  id: string;
+  title: string;
   category: string;
   price: number;
   stock: number;
-  image: string;
-  status: "Active" | "Draft";
+  images: string[];
+  status: boolean;
+  socksType: SocksType;
+  description?: string;
 }
 
 export function AdminProducts() {
+  const {getAllProducts, createProduct} = productApi;
   const [products, setProducts] = useState<Product[]>([
-    {
-      id: 1,
-      name: "Classic Striped Crew Socks",
-      category: "Casual",
-      price: 12.99,
-      stock: 150,
-      image: "https://images.unsplash.com/photo-1615486364462-ef6363adbc18?w=100",
-      status: "Active"
-    },
-    {
-      id: 2,
-      name: "Premium Wool Winter Socks",
-      category: "Cozy",
-      price: 24.99,
-      stock: 89,
-      image: "https://images.unsplash.com/photo-1647549897410-3583914a7961?w=100",
-      status: "Active"
-    },
-    {
-      id: 3,
-      name: "Athletic Performance Socks",
-      category: "Athletic",
-      price: 16.99,
-      stock: 200,
-      image: "https://images.unsplash.com/photo-1608357746078-342b38f738c1?w=100",
-      status: "Active"
-    },
-    {
-      id: 4,
-      name: "Business Dress Socks",
-      category: "Dress",
-      price: 19.99,
-      stock: 120,
-      image: "https://images.unsplash.com/photo-1641482847237-e64ca2769a8c?w=100",
-      status: "Draft"
-    }
+    // {
+    //   id: 1,
+    //   name: "Classic Striped Crew Socks",
+    //   category: "Casual",
+    //   price: 12.99,
+    //   stock: 150,
+    //   image: "https://images.unsplash.com/photo-1615486364462-ef6363adbc18?w=100",
+    //   status: "Active",
+    //   socksType: "male"
+    // },
+    // {
+    //   id: 2,
+    //   name: "Premium Wool Winter Socks",
+    //   category: "Cozy",
+    //   price: 24.99,
+    //   stock: 89,
+    //   image: "https://images.unsplash.com/photo-1647549897410-3583914a7961?w=100",
+    //   status: "Active",
+    //   socksType: "female"
+    // },
+    // {
+    //   id: 3,
+    //   name: "Athletic Performance Socks",
+    //   category: "Athletic",
+    //   price: 16.99,
+    //   stock: 200,
+    //   image: "https://images.unsplash.com/photo-1608357746078-342b38f738c1?w=100",
+    //   status: "Active",
+    //   socksType: "kids"
+    // },
+    // {
+    //   id: 4,
+    //   name: "Business Dress Socks",
+    //   category: "Dress",
+    //   price: 19.99,
+    //   stock: 120,
+    //   image: "https://images.unsplash.com/photo-1641482847237-e64ca2769a8c?w=100",
+    //   status: "Draft",
+    //   socksType: "male"
+    // }
   ]);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  const [formData, setFormData] = useState({
-    name: "",
+  const fetchProducts = async () => {
+    try {
+      const response = await getAllProducts();
+      setProducts(response.data);
+      console.log("Fetched products:", response.data);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    }
+  };
+   const [formData, setFormData] = useState({
+    title: "",
     category: "Casual",
-    price: "",
+    price: "",  
     stock: "",
     image: "",
     description: "",
-    status: "Active" as "Active" | "Draft"
+    status: true ? "Active" : "Draft",
+    socksType: "Male" as "Male" | "Female" | "Kids"
   });
+  // const socksType = ["Male", "Female", "Kids"];
+  const categories =  [
+    { name: "Casual", type: ["male", "female", "kids"] },
+    { name: "Athletic", type: ["male", "female", "kids"] },
+    { name: "Dress", type: ["male", "female"] },
+    { name: "Cozy", type: ["kids"] },
+    { name: "Formal", type: ["male", "female"] },
+    { name: "Outdoor", type: ["male", "female", "kids"] },
+    { name: "sports", type: ["male", "female", "kids"] }
+  ];
+  const handleSocksTypeChange = (value: string) => {
+  const normalized = value.toLowerCase() as SocksType; // "male", "female", "kids"
+  setFormData({
+    ...formData,
+    socksType: value as "Male" | "Female" | "Kids", // store original casing for Select
+    category: "" // reset category when type changes
+  });
+};
 
-  const handleSubmit = (e: React.FormEvent) => {
+// Filter categories based on normalized socksType
+const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
+  const normalized = socksType.toLowerCase() as SocksType;
+  return categories
+    .filter(cat => cat.type.includes(normalized))
+    .map(cat => cat.name);
+};
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (editingProduct) {
       // Update existing product
       setProducts(products.map(p => 
         p.id === editingProduct.id 
-          ? { ...p, ...formData, price: parseFloat(formData.price), stock: parseInt(formData.stock) }
+          ? { 
+              ...p, 
+              ...formData, 
+              price: parseFloat(formData.price), 
+              stock: parseInt(formData.stock),
+              socksType: (formData.socksType as string).toLowerCase() as SocksType,
+              status: formData.status === "Active" ? true : false
+            }
           : p
       ));
       toast.success("Product updated successfully!");
     } else {
       // Add new product
-      const newProduct: Product = {
-        id: products.length + 1,
-        name: formData.name,
+      const newProduct: Omit<Product, "id"> = {
+        title: formData.title,
         category: formData.category,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-        image: formData.image || "https://images.unsplash.com/photo-1615486364462-ef6363adbc18?w=100",
-        status: formData.status
+        images: formData.image ? [formData.image] : [""],
+        status: formData.status === "Active" ? true : false,
+        socksType: (formData.socksType as string).toLowerCase() as SocksType 
       };
-      setProducts([...products, newProduct]);
+      const response = await createProduct(newProduct);
+      if (response && response.data) {
+       try {
+        setProducts([...products, response.data]);
+       } catch (error) {
+        console.error("Failed to add product:", error);
+       }
+      }
       toast.success("Product added successfully!");
+      alert('Product created successfully!');
+      fetchProducts();
     }
     
     resetForm();
@@ -126,37 +186,38 @@ export function AdminProducts() {
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setFormData({
-      name: product.name,
+      title: product.title,
       category: product.category,
       price: product.price.toString(),
       stock: product.stock.toString(),
-      image: product.image,
+      image: product.images[0] || "",
       description: "",
-      status: product.status
+      status: product.status === true ? "Active" : "Draft", 
+      socksType: product.socksType.charAt(0).toUpperCase() + product.socksType.slice(1) as "Male" | "Female" | "Kids"
     });
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setProducts(products.filter(p => p.id !== id));
     toast.success("Product deleted successfully!");
   };
 
   const resetForm = () => {
     setFormData({
-      name: "",
+      title: "",
       category: "Casual",
       price: "",
       stock: "",
       image: "",
       description: "",
-      status: "Active"
+      status: "Active",
+      socksType: "Male"
     });
     setEditingProduct(null);
   };
-
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -190,27 +251,44 @@ export function AdminProducts() {
                   <label htmlFor="name">Product Name</label>
                   <input
                     id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="Enter product name"
                     required
                     className="mt-1.5 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-purple-600 focus:ring-purple-600"
                   />
                 </div>
+                <div className="col-span-2">
+                  <label htmlFor="socksType">Type</label>
+                  <Select value={formData.socksType} onValueChange={handleSocksTypeChange}>
+                    <SelectTrigger className="mt-1.5 w-full">
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Kids">Kids</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <div>
                   <label htmlFor="category">Category</label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                    <SelectTrigger className="mt-1.5">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Casual">Casual</SelectItem>
-                      <SelectItem value="Athletic">Athletic</SelectItem>
-                      <SelectItem value="Dress">Dress</SelectItem>
-                      <SelectItem value="Cozy">Cozy</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Select
+                      value={formData.category}
+                      onValueChange={(value) => setFormData({ ...formData, category: value })}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getCategoriesByUser(formData.socksType).map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                 </div>
 
                 <div>
@@ -227,7 +305,7 @@ export function AdminProducts() {
                 </div>
 
                 <div>
-                  <label htmlFor="price">Price ($)</label>
+                  <label htmlFor="price">Price (Rs)</label>
                   <input
                     id="price"
                     type="number"
@@ -276,7 +354,6 @@ export function AdminProducts() {
                   />
                 </div>
               </div>
-
               <div className="flex gap-3 pt-4">
                 <Button type="submit" className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                   {editingProduct ? "Update Product" : "Add Product"}
@@ -322,6 +399,7 @@ export function AdminProducts() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Product</TableHead>
+                  <TableHead>Description</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Price</TableHead>
                   <TableHead>Stock</TableHead>
@@ -341,13 +419,14 @@ export function AdminProducts() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <img
-                          src={product.image}
-                          alt={product.name}
+                          src={product.images[0]}
+                          alt={product.title}
                           className="w-12 h-12 rounded-lg object-cover"
                         />
-                        <span>{product.name}</span>
+                        <span>{product.title}</span>
                       </div>
                     </TableCell>
+                    <TableCell>{product.description}</TableCell>
                     <TableCell>{product.category}</TableCell>
                     <TableCell>${product.price.toFixed(2)}</TableCell>
                     <TableCell>
@@ -356,8 +435,8 @@ export function AdminProducts() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={product.status === "Active" ? "default" : "secondary"}>
-                        {product.status}
+                      <Badge variant={product.status === true ? "default" : "secondary"}>
+                        {product.status === true ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

@@ -19,10 +19,26 @@ import AdminSliders from "../../components/admin/AdminSilder";
 import AdminOrders from "../../components/admin/AdminOrder.";
 import { AdminCustomers } from "../../components/admin/AdminCustomer";
 import AdminSettings from "../../components/admin/AdminSetting";
+import AdminLoginPage  from "./AdminLoginPage";
+import AdminSignUpPage  from "./AdminSignUpPage";
 
 function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const isLoginPage = location.pathname === "/admin/login"; 
+  const isRegisterPage = location.pathname === "/admin/register";
+
+  // If on login or register page, return ONLY login or register screen
+  if (isLoginPage || isRegisterPage) {
+    return (
+      <main className="min-h-screen">
+        <Routes>
+          <Route path="/login" element={<AdminLoginPage />} />
+          <Route path="/register" element={<AdminSignUpPage />} />
+        </Routes>
+      </main>
+    );
+  }
   const menuItems = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { to: "/admin/products", label: "Products", icon: Package },
@@ -39,7 +55,7 @@ function AdminLayout() {
         {/* <h2 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
           SockShop Admin
         </h2> */}
-        <Link to="/">
+        <Link to="/admin">
           <img src="logo2.png" alt="capri Logo" className="w-[75px] md:w-28" />
         </Link>
         <Button
@@ -52,6 +68,7 @@ function AdminLayout() {
       </div>
 
       {/* Sidebar */}
+      
       <AnimatePresence>
         {(sidebarOpen || window.innerWidth >= 1024) && (
           <motion.aside

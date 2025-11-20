@@ -2,38 +2,56 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
-
-export function LoginPage() {
+function LoginPage() {
+  const { login } = useAuth() || {};
   const navigate = useNavigate();
   const isAdminLogin = false;
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [form, setForm] = useState({ email: "", password: "", rememberMe: false });
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const onLogin = (role: "admin" | "user") => {
-    if (role === "admin") {
-      window.location.href = "/admin";
-    } else {
-      window.location.href = "/";
-    }
-  };
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Mock validation - in production, validate with backend
-    if (email && password) {
-      if (isAdminLogin) {
-        onLogin("admin");
-      } else {
-        onLogin("user");
-      }
-    }
-   console.log("Login attempted with:", { email, password, rememberMe });
+  // const onLogin = (role: "admin" | "user") => {
+  //   if (role === "admin") {
+  //     navigate("/admin");
+  //   } else {
+  //     navigate("/");
+  //   }
+  // };
+const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  console.log("HandleLogin called", form);
+
+  if (!login) {
+    console.error("Login function is undefined");
+    return;
+  }
+
+  try {
+    const res = await login(form);
+    console.log("Login response:", res);
+  } catch (err) {
+    console.error("Login failed:", err);
+  }
+};
+
+
+  // const handleLogin = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   // Mock validation - in production, validate with backend
+  //   // if (form.email && form.password) {
+  //   //   if (isAdminLogin) {
+  //   //     onLogin("admin");
+  //   //   } else {
+  //   //     onLogin("user");
+  //   //   }
+  //     await login?.(form);
+  //   // }
+  //  console.log("Login attempted with:", { ...form, rememberMe });
     
-  };
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center p-4">
@@ -83,8 +101,8 @@ export function LoginPage() {
                     id="email"
                     type="email"
                     placeholder={isAdminLogin ? "admin@sockshop.com" : "you@example.com"}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
                     className="pl-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     required
                   />
@@ -99,8 +117,8 @@ export function LoginPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
                     className="pl-10 pr-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     required
                   />
@@ -122,8 +140,8 @@ export function LoginPage() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="remember"
-                    checked={rememberMe}
-                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    checked={form.rememberMe}
+                    onCheckedChange={(checked) => setForm({ ...form, rememberMe: checked as boolean })}
                   />
                   <label
                     htmlFor="remember"

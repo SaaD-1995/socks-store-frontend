@@ -15,9 +15,9 @@ import ProductDetailPage from "./Pages/ProductDetailPage";
 import LoginPage from "./Pages/LoginPage";
 import SignupPage from "./Pages/SignUpPage";
 import { Product } from './components/Home/ProductCard';
+import ProtectedRoute from './components/ProtectedRoute';
 type AdminPage = "dashboard" | "products" | "sliders" | "orders" | "customers" | "settings";
 function App() {
-  const [adminPage, setAdminPage] = useState<AdminPage>("dashboard");
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
   return (
@@ -35,6 +35,14 @@ function App() {
           <Route path="/collections" element={<CollectionPage  />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/login" element={<LoginPage />}/>
+          <Route path="/profile" 
+          element=
+          {<ProtectedRoute>
+                <div className="p-4">
+                  <h1 className="text-2xl font-bold mb-4">User Profile</h1>
+                  <p>This is a protected profile page. Only logged-in users can see this.</p>
+                </div>
+            </ProtectedRoute>} />
           <Route path="/signup" element={<SignupPage />} />
           <Route
             path="*"
