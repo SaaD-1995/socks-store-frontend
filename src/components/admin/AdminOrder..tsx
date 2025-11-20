@@ -10,7 +10,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TablePagination
+  // TableFooterPagination,
+  TableFooter,
 } from "../../ui/table";
 import { Badge } from "../../ui/badge";
 import {
@@ -376,20 +377,21 @@ function AdminOrders() {
                     </TableCell>
                   </motion.tr>
                 ))}
-            
               </TableBody>
-                  <TablePagination 
-                    totalItems={filteredOrders.length}
-                    page={page}
-                    pageSize={pageSize}
-                    onPageChange={setPage}
-                    onPageSizeChange={setPageSize}
-                    className="mt-4 w-full"
-                />
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+              <TableFooter>
+              {/* <TableFooterPagination
+                totalItems={filteredOrders.length}  
+                pageSize={pageSize}
+                onPageSizeChange={(newSize) => setPageSize(newSize)}
+                page={page}
+                // totalPages={Math.ceil(filteredOrders.length / pageSize)}
+                onPageChange={(newPage) => setPage(newPage)}
+              /> */}
+            </TableFooter>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
     </div>
   );
 }

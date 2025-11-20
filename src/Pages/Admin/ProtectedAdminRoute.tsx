@@ -21,6 +21,7 @@
 import React, { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import Spinner from "../../ui/Spinner";
 
 interface Props {
   children: ReactNode;
@@ -28,8 +29,10 @@ interface Props {
 
 const ProtectedAdminRoute: React.FC<Props> = ({ children }) => {
   const { user, loading } = useAuth();
-
-  if (loading) return <p>Loading...</p>;
+  setTimeout(() => {
+    loading && <div className="min-h-screen flex justify-center items-center"><Spinner size={34} color="red"/></div>;
+  }, 2000);
+  if (loading) return <div className="min-h-screen flex justify-center items-center"><Spinner size={50} color="red"/></div>;
   const isAdmin = user?.isAdmin === false;
   if (isAdmin) {
     return <Navigate to="/" replace />;

@@ -1,6 +1,7 @@
 import { useEffect, useState} from "react";
+import debounce from "lodash.debounce";
 import { motion } from "motion/react";
-import { Plus, Pencil, Trash2, Search, Filter } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Filter, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import {
@@ -10,6 +11,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  // TableFooterPagination,
+  TableFooter,
 } from "../../ui/table";
 import {
   Dialog,
@@ -28,6 +31,8 @@ import {
 } from "../../ui/select";
 import { toast } from "sonner";
 import productApi from "../../api/productApi";
+import Spinner from "../../ui/Spinner";
+
 type SocksType = "male" | "female" | "kids";
 interface Product {
  _id: string;
@@ -43,58 +48,27 @@ interface Product {
 
 export function AdminProducts() {
   const {getAllProducts, createProduct, updateProduct, deleteProduct} = productApi;
-  const [products, setProducts] = useState<Product[]>([
-    // {
-    //   id: 1,
-    //   name: "Classic Striped Crew Socks",
-    //   category: "Casual",
-    //   price: 12.99,
-    //   stock: 150,
-    //   image: "https://images.unsplash.com/photo-1615486364462-ef6363adbc18?w=100",
-    //   status: "Active",
-    //   socksType: "male"
-    // },
-    // {
-    //   id: 2,
-    //   name: "Premium Wool Winter Socks",
-    //   category: "Cozy",
-    //   price: 24.99,
-    //   stock: 89,
-    //   image: "https://images.unsplash.com/photo-1647549897410-3583914a7961?w=100",
-    //   status: "Active",
-    //   socksType: "female"
-    // },
-    // {
-    //   id: 3,
-    //   name: "Athletic Performance Socks",
-    //   category: "Athletic",
-    //   price: 16.99,
-    //   stock: 200,
-    //   image: "https://images.unsplash.com/photo-1608357746078-342b38f738c1?w=100",
-    //   status: "Active",
-    //   socksType: "kids"
-    // },
-    // {
-    //   id: 4,
-    //   name: "Business Dress Socks",
-    //   category: "Dress",
-    //   price: 19.99,
-    //   stock: 120,
-    //   image: "https://images.unsplash.com/photo-1641482847237-e64ca2769a8c?w=100",
-    //   status: "Draft",
-    //   socksType: "male"
-    // }
-  ]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
   useEffect(() => {
     fetchProducts();
-  }, []);
-
+  }, [page, pageSize]);
   const fetchProducts = async () => {
+    setLoading(true);
     try {
-      const response = await getAllProducts();
-      setProducts(response.data);
+      const response = await getAllProducts(page, pageSize);
+      setTimeout(() => {
+      setProducts(response.data.products);
+      setTotalItems(response.data.totalProducts);
+      }, 1000);
     } catch (error) {
       console.error("Failed to fetch products:", error);
+    }
+    finally {
+      setLoading(false);
     }
   };
    const [formData, setFormData] = useState({
@@ -118,7 +92,6 @@ export function AdminProducts() {
     { name: "sports", type: ["male", "female", "kids"] }
   ];
   const handleSocksTypeChange = (value: string) => {
-  const normalized = value.toLowerCase() as SocksType; // "male", "female", "kids"
   setFormData({
     ...formData,
     socksType: value as "Male" | "Female" | "Kids", // store original casing for Select
@@ -136,6 +109,15 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchProducts = async (query: string) => {
+    try {
+      const response = await productApi.searchProducts(query);
+      setProducts(response.data.products);
+    } catch (error) {
+      console.error("Failed to search products:", error);
+    }
+  };
+  debounce(searchProducts, 500);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -207,7 +189,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
       price: product.price.toString(),
       stock: product.stock.toString(),
       image: product.images[0] || "",
-      description: "",
+      description: product.description,
       status: product.status === true ? "Active" : "Draft", 
       socksType: product.socksType === "male" ? "Male" : product.socksType === "female" ? "Female" : "Kids"
     });
@@ -237,7 +219,10 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
     product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
+  const onNextPage = () => {
+    setPage((prev) => prev + 1);
+    fetchProducts();
+  }
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -263,8 +248,8 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
             </DialogHeader>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="col-span-2">
                   <label htmlFor="name">Product Name</label>
                   <input
                     id="name"
@@ -289,7 +274,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                   </Select>
                 </div>
 
-                <div>
+                <div className="md:col-span-1 col-span-2">
                   <label htmlFor="category">Category</label>
                   <Select
                       value={formData.category}
@@ -308,7 +293,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                     </Select>
                 </div>
 
-                <div>
+                <div className="md:col-span-1 col-span-2">
                   <label htmlFor="status">Status</label>
                   <Select value={formData.status} onValueChange={(value: "Active" | "Draft") => setFormData({ ...formData, status: value })}>
                     <SelectTrigger className="mt-1.5">
@@ -321,7 +306,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                   </Select>
                 </div>
 
-                <div>
+                <div className="md:col-span-1 col-span-2">
                   <label htmlFor="price">Price (Rs)</label>
                   <input
                     id="price"
@@ -335,7 +320,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                   />
                 </div>
 
-                <div>
+                <div className="md:col-span-1 col-span-2">
                   <label htmlFor="stock">Stock Quantity</label>
                   <input
                     id="stock"
@@ -348,7 +333,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                   />
                 </div>
 
-                <div className="md:col-span-2">
+                <div className="md:col-span-2 col-span-2">
                   <label htmlFor="image">Image URL</label>
                   <input
                     id="image"
@@ -359,7 +344,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                   />
                 </div>
 
-                <div className="md:col-span-2">
+                <div className="md:col-span-2 col-span-2">
                   <label htmlFor="description">Description</label>
                   <textarea
                     id="description"
@@ -393,7 +378,10 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
               <input
                 placeholder="Search products..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  searchProducts(e.target.value);
+                }}
                 className="pl-9 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-purple-600 focus:ring-purple-600"
               />
             </div>
@@ -411,75 +399,143 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
           <CardTitle>All Products ({filteredProducts.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProducts.map((product, index) => (
-                  <motion.tr
-                    key={product._id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="border-b"
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={product.images[0]}
-                          alt={product.title}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
-                        <span>{product.title}</span>
+            <div className="flex flex-col" data-hs-datatable='{
+                "pageLength": 10,
+                "pagingOptions": {
+                  "pageBtnClasses": "min-w-10 flex justify-center items-center text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 py-2.5 text-sm rounded-full disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:focus:bg-neutral-700 dark:hover:bg-neutral-700"
+                }
+              }'>
+                  <div className="min-h-130 overflow-x-auto">
+                    <div className="min-w-full inline-block align-middle">
+                      <div className="overflow-hidden">
+                        <table className="min-w-full">
+                          <thead className="border-b border-gray-200 dark:border-neutral-700">
+                            <tr>
+                              <th scope="col" className="py-1 text-start font-normal">Product</th>
+                              <th scope="col" className="py-1 text-start font-normal">Description</th>
+                              <th scope="col" className="py-1 text-start font-normal">Category</th>
+                              <th scope="col" className="py-1 text-start font-normal">Price</th>
+                              <th scope="col" className="py-1 text-start font-normal">Stock</th>
+                              <th scope="col" className="py-1 text-start font-normal">Status</th>
+                              <th scope="col" className="text-right font-normal">Actions</th>
+                            </tr>
+                          </thead>
+
+                          <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
+                            {
+                              loading && (
+                              <tr>
+                                <td colSpan={7} className="text-center py-4">
+                                  <Spinner />
+                                </td>
+                              </tr>
+                              )
+                            }
+                            {filteredProducts.map((product, index) => (
+                              <motion.tr
+                                key={product._id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="border-b"
+                              >
+                                <td className="p-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-neutral-200">
+                                    <div className="flex items-center gap-3">
+                                        <img
+                                          src={product.images[0]}
+                                          alt={product.title}
+                                          className="w-12 h-12 rounded-lg object-cover"
+                                        />
+                                        <span>{product.title}</span>
+                                      </div>
+                                </td>
+                                <td className="p-3 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{product.description}</td>
+                                <td className="p-3 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{product.category}</td>
+                                <td className="p-3 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">${product.price.toFixed(2)}</td>
+                                <td className="p-3 whitespace-nowrap text-sm font-medium">
+                                    <span className={product.stock < 50 ? "text-red-600" : "text-gray-900"}>
+                                      {product.stock}
+                                    </span>
+                                </td>
+                                <td className="p-3 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">
+                                    <Badge variant={product.status === true ? "default" : "secondary"}>
+                                      {product.status === true ? "Active" : "Inactive"}
+                                    </Badge>
+                                </td>
+                                <td className="p-3 whitespace-nowrap text-end text-sm font-medium">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleEdit(product)}
+                                    >
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleDelete(product._id)}
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </td>
+                              </motion.tr>
+                            ))}
+                            {
+                              filteredProducts.length === 0 && (
+                                <tr>
+                                  <td colSpan={7} className="text-center py-4">No products found.</td>
+                                </tr>
+                              )
+                            }
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </TableCell>
-                    <TableCell>{product.description}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <span className={product.stock < 50 ? "text-red-600" : "text-gray-900"}>
-                        {product.stock}
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4 border-t pt-4">
+                    <div className="w-full">
+                      <span className="text-sm text-gray-600 dark:text-neutral-400">
+                        Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, totalItems)} of {totalItems} results
                       </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={product.status === true ? "default" : "secondary"}>
-                        {product.status === true ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(product)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(product._id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline"
+                        onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                        className="rounded-full p-2.5 w-9 h-9"
+                        disabled={page === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <div className="flex items-center space-x-1 [&>.active]:bg-gray-100 dark:[&>.active]:bg-neutral-700">
+                        {Array.from({ length: Math.ceil(totalItems / pageSize) }, (_, i) => i + 1).map((pageNumber) => (
+                          <Button 
+                            variant={pageNumber === page ? "outline" : "ghost"}
+                            key={pageNumber}>
+                            <span
+                              onClick={() => setPage(pageNumber)}
+                              className={`flex justify-center items-center  ${pageNumber === page ? 'active' : ''}`}
+                            >
+                              {pageNumber}
+                            </span>
+                          </Button>
+                        ))}
                       </div>
-                    </TableCell>
-                  </motion.tr>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                      <Button 
+                          variant="outline"
+                          onClick={onNextPage}
+                          className="rounded-full p-2.5 w-9 h-9"
+                          disabled={page >= Math.ceil(totalItems / pageSize)}
+                        >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+              </div>
         </CardContent>
       </Card>
     </div>

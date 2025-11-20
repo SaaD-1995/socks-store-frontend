@@ -1,18 +1,7 @@
 "use client";
 
 import * as React from "react";
-
 import { cn } from "./utils";
-import { Button } from "./button";
-import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "./select";
-type TablePaginationProps = {
-  totalItems: number;
-  page: number;
-  pageSize: number;
-  onPageChange: (p: number) => void;
-  onPageSizeChange: (s: number) => void;
-  className?: string;
-};
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
@@ -53,10 +42,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn(
-        "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
-        className,
-      )}
+      className={cn("[&_tr:last-child]:border-0", className)}
       {...props}
     />
   );
@@ -113,84 +99,6 @@ function TableCaption({
     />
   );
 };
-// make functions for pagination components like TablePagination, TablePaginationNext, TablePaginationPrevious, TablePaginationEllipsis
-
-function TablePagination({
-  totalItems,
-  page,
-  pageSize,
-  onPageChange,
-  onPageSizeChange,
-  className,
-  ...props
-}: TablePaginationProps) {
-  const pageSizes = [10, 20, 30, 50, 100, 250];
-
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-
-  if (totalItems <= 10) {
-    return null; 
-  }
-
-  function gotoPage(p: number) {
-    if (p < 1) p = 1;
-    if (p > totalPages) p = totalPages;
-    onPageChange(p);
-  }
-
-  return (
-    <div
-      data-slot="table-pagination"
-      className={cn("flex items-center justify-end mt-4 w-full", className)}
-      {...props}
-    >
-      {/* LEFT SIDE — Page Size Dropdown */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm">Rows per page:</span>
-        <Select
-          value={pageSize.toString()}
-          onValueChange={(value) => onPageSizeChange(Number(value))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={pageSize.toString()} />
-          </SelectTrigger>
-          <SelectContent>
-          {pageSizes.map((size) => (
-            <SelectItem key={size} value={size.toString()}>
-              {size}
-            </SelectItem>
-          ))}
-          </SelectContent>
-        </Select>
-
-        <span className="text-muted-foreground text-sm">
-          {totalItems} items
-        </span>
-      </div>
-
-      {/* RIGHT SIDE — Pagination Controls */}
-      <div className="flex items-center gap-3">
-        <Button
-          onClick={() => gotoPage(page - 1)}
-          disabled={page === 1}
-          variant="secondary"
-        >
-          Prev
-        </Button>
-        <span className="text-sm">
-          Page {page} of {totalPages}
-        </span>
-        <Button
-          onClick={() => gotoPage(page + 1)}
-          disabled={page === totalPages}
-          variant="secondary"
-        >
-          Next
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 export {
   Table,
@@ -201,5 +109,4 @@ export {
   TableRow,
   TableCell,
   TableCaption,
-  TablePagination,
 };

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Button } from "../../ui/button";
+import productApi from '../../api/productApi';
 import {
   LineChart,
   Line,
@@ -25,7 +26,26 @@ import {
   Cell
 } from "recharts";
 
+import React, { useEffect, useState } from "react";
+
 function AdminDashboard() {
+  const { totalProducts } = productApi;
+  const [productCount, setProductCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchTotalProducts = async () => {
+      try {
+        const response = await totalProducts();
+        setProductCount(
+         response.data
+        );
+      } catch {
+        setProductCount(0);
+      }
+    };
+    fetchTotalProducts();
+  }, [totalProducts]);
+
   const stats = [
     {
       title: "Total Revenue",
@@ -45,7 +65,7 @@ function AdminDashboard() {
     },
     {
       title: "Total Products",
-      value: "567",
+      value: productCount,
       change: "+5.2%",
       trend: "up",
       icon: Package,

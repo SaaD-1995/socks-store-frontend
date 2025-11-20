@@ -56,7 +56,7 @@ function AdminLayout() {
           SockShop Admin
         </h2> */}
         <Link to="/admin">
-          <img src="logo2.png" alt="capri Logo" className="w-[75px] md:w-28" />
+          <img src="/logo2.png" alt="capri Logo" className="w-[75px] md:w-28" />
         </Link>
         <Button
           variant="ghost"
