@@ -5,16 +5,6 @@ import { Plus, Pencil, Trash2, Search, Filter, ChevronRight, ChevronLeft } from 
 import { Button } from "../../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  // TableFooterPagination,
-  TableFooter,
-} from "../../ui/table";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -61,8 +51,8 @@ export function AdminProducts() {
     try {
       const response = await getAllProducts(page, pageSize);
       setTimeout(() => {
-      setProducts(response.data.products);
-      setTotalItems(response.data.totalProducts);
+        setProducts(response.data.products);
+        setTotalItems(response.data.totalProducts);
       }, 1000);
     } catch (error) {
       console.error("Failed to fetch products:", error);
@@ -411,27 +401,27 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                         <table className="min-w-full">
                           <thead className="border-b border-gray-200 dark:border-neutral-700">
                             <tr>
-                              <th scope="col" className="py-1 text-start font-normal">Product</th>
-                              <th scope="col" className="py-1 text-start font-normal">Description</th>
-                              <th scope="col" className="py-1 text-start font-normal">Category</th>
-                              <th scope="col" className="py-1 text-start font-normal">Price</th>
-                              <th scope="col" className="py-1 text-start font-normal">Stock</th>
-                              <th scope="col" className="py-1 text-start font-normal">Status</th>
-                              <th scope="col" className="text-right font-normal">Actions</th>
+                              <th scope="col" className="py-1 text-start font-medium">Product</th>
+                              <th scope="col" className="py-1 text-start font-medium">Description</th>
+                              <th scope="col" className="py-1 text-start font-medium">Category</th>
+                              <th scope="col" className="py-1 text-start font-medium">Price</th>
+                              <th scope="col" className="py-1 text-start font-medium">Stock</th>
+                              <th scope="col" className="py-1 text-start font-medium">Status</th>
+                              <th scope="col" className="text-right font-medium">Actions</th>
                             </tr>
                           </thead>
 
                           <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
                             {
-                              loading && (
+                              loading ? (
                               <tr>
-                                <td colSpan={7} className="text-center py-4">
-                                  <Spinner />
+                                <td colSpan={5} className="flex justify-center items-center text-center py-4">
+                                  <Spinner size={24} color="blue" />
                                 </td>
                               </tr>
                               )
-                            }
-                            {filteredProducts.map((product, index) => (
+                              :
+                            filteredProducts.map((product, index) => (
                               <motion.tr
                                 key={product._id}
                                 initial={{ opacity: 0 }}
@@ -535,7 +525,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                       </Button>
                     </div>
                   </div>
-              </div>
+            </div>
         </CardContent>
       </Card>
     </div>

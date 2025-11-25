@@ -48,6 +48,10 @@ export default {
         black: {
           900: "#000000",
         },
+        quaternary: {
+          DEFAULT: "#CFCFCF",
+          foreground: "#1F2937",
+        },
       },
     },
 

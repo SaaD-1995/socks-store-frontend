@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -15,13 +15,16 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import productApi from '../api/productApi';
+import { set } from "lodash";
+import Spinner from "../ui/Spinner";
 
 interface Product {
-  id: number;
-  name: string;
+  _id: string;
+  title: string;
   price: number;
   originalPrice?: number;
-  image: string;
+  images: string[];
   rating: number;
   reviews: number;
   badge?: string;
@@ -31,178 +34,40 @@ interface Product {
   material: string;
 }
 
-const allProducts: Product[] = [
-  {
-    id: 1,
-    name: "Classic Striped Crew Socks",
-    price: 12.99,
-    originalPrice: 18.99,
-    image: "https://images.unsplash.com/photo-1615486364462-ef6363adbc18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHJpcGVkJTIwc29ja3MlMjBmYXNoaW9ufGVufDF8fHx8MTc2MjE5MTE2OHww&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.8,
-    reviews: 156,
-    badge: "Sale",
-    colors: ["Blue", "Red", "Green"],
-    sizes: ["S", "M", "L"],
-    category: "Casual",
-    material: "Cotton"
-  },
-  {
-    id: 2,
-    name: "Premium Wool Winter Socks",
-    price: 24.99,
-    image: "https://images.unsplash.com/photo-1647549897410-3583914a7961?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b29sJTIwa25pdCUyMHNvY2tzfGVufDF8fHx8MTc2MjE5MTE2OHww&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.9,
-    reviews: 203,
-    badge: "New",
-    colors: ["Gray", "Navy", "Black"],
-    sizes: ["M", "L", "XL"],
-    category: "Cozy",
-    material: "Wool"
-  },
-  {
-    id: 3,
-    name: "Athletic Performance Socks",
-    price: 16.99,
-    image: "https://images.unsplash.com/photo-1608357746078-342b38f738c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbmtsZSUyMHNwb3J0cyUyMHNvY2tzfGVufDF8fHx8MTc2MjE5MTE2OHww&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.7,
-    reviews: 89,
-    colors: ["White", "Black"],
-    sizes: ["S", "M", "L"],
-    category: "Athletic",
-    material: "Polyester Blend"
-  },
-  {
-    id: 4,
-    name: "Business Dress Socks",
-    price: 19.99,
-    image: "https://images.unsplash.com/photo-1641482847237-e64ca2769a8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcmVzcyUyMHNvY2tzJTIwZWxlZ2FudHxlbnwxfHx8fDE3NjE4ODcyNzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.6,
-    reviews: 124,
-    colors: ["Black", "Navy", "Brown"],
-    sizes: ["M", "L"],
-    category: "Dress",
-    material: "Cotton Blend"
-  },
-  {
-    id: 5,
-    name: "Cozy Home Comfort Socks",
-    price: 14.99,
-    image: "https://images.unsplash.com/photo-1739640081476-fd55589f8838?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwZnV6enklMjBzb2Nrc3xlbnwxfHx8fDE3NjIxOTExNzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.9,
-    reviews: 178,
-    badge: "Popular",
-    colors: ["Pink", "Gray", "Cream"],
-    sizes: ["S", "M", "L"],
-    category: "Cozy",
-    material: "Fleece"
-  },
-  {
-    id: 6,
-    name: "Colorful Pattern Mix Pack",
-    price: 29.99,
-    originalPrice: 39.99,
-    image: "https://images.unsplash.com/photo-1759782178780-6b6c54dd42a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYXR0ZXJuZWQlMjBjb2xvcmZ1bCUyMHNvY2tzfGVufDF8fHx8MTc2MjE5MTE2OXww&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.8,
-    reviews: 267,
-    badge: "Bundle",
-    colors: ["Multi", "Rainbow"],
-    sizes: ["M", "L"],
-    category: "Casual",
-    material: "Cotton"
-  },
-  {
-    id: 7,
-    name: "Compression Athletic Socks",
-    price: 22.99,
-    image: "https://images.unsplash.com/photo-1640025867572-f6b3a8410c81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21wcmVzc2lvbiUyMGF0aGxldGljJTIwc29ja3N8ZW58MXx8fHwxNzYyMTkxMTY5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.7,
-    reviews: 145,
-    colors: ["Black", "Blue"],
-    sizes: ["S", "M", "L", "XL"],
-    category: "Athletic",
-    material: "Compression Fabric"
-  },
-  {
-    id: 8,
-    name: "Merino Wool Hiking Socks",
-    price: 26.99,
-    image: "https://images.unsplash.com/photo-1730449989570-23aef9239e07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwd29vbCUyMHNvY2tzfGVufDF8fHx8MTc2MTg4NzI3NXww&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.9,
-    reviews: 187,
-    badge: "New",
-    colors: ["Brown", "Green", "Gray"],
-    sizes: ["M", "L", "XL"],
-    category: "Athletic",
-    material: "Merino Wool"
-  },
-  {
-    id: 9,
-    name: "Formal Executive Socks",
-    price: 18.99,
-    image: "https://images.unsplash.com/photo-1641482847237-e64ca2769a8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcmVzcyUyMHNvY2tzJTIwZWxlZ2FudHxlbnwxfHx8fDE3NjE4ODcyNzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.5,
-    reviews: 98,
-    colors: ["Black", "Charcoal"],
-    sizes: ["M", "L"],
-    category: "Dress",
-    material: "Bamboo"
-  },
-  {
-    id: 10,
-    name: "Striped Fashion Crew",
-    price: 15.99,
-    originalPrice: 21.99,
-    image: "https://images.unsplash.com/photo-1615486364462-ef6363adbc18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHJpcGVkJTIwc29ja3MlMjBmYXNoaW9ufGVufDF8fHx8MTc2MjE5MTE2OHww&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.6,
-    reviews: 112,
-    badge: "Sale",
-    colors: ["Navy", "Red", "Green"],
-    sizes: ["S", "M", "L"],
-    category: "Casual",
-    material: "Cotton"
-  },
-  {
-    id: 11,
-    name: "Ankle Sports Pack",
-    price: 19.99,
-    image: "https://images.unsplash.com/photo-1760177379331-a8b4311db4a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhdGhsZXRpYyUyMHNwb3J0cyUyMHNvY2tzfGVufDF8fHx8MTc2MTg4NzI3NXww&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.8,
-    reviews: 223,
-    badge: "Popular",
-    colors: ["White", "Black", "Gray"],
-    sizes: ["S", "M", "L"],
-    category: "Athletic",
-    material: "Polyester Blend"
-  },
-  {
-    id: 12,
-    name: "Fuzzy Bedroom Socks",
-    price: 13.99,
-    image: "https://images.unsplash.com/photo-1739640081476-fd55589f8838?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwZnV6enklMjBzb2Nrc3xlbnwxfHx8fDE3NjIxOTExNzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.9,
-    reviews: 291,
-    colors: ["Cream", "Pink", "Lavender"],
-    sizes: ["One Size"],
-    category: "Cozy",
-    material: "Fleece"
-  }
-];
 
-// interface CollectionPageProps {
-//   collectionName: string;
-//   onAddToCart: (product: Product) => void;
-// }
-// { collectionName, onAddToCart }: CollectionPageProps
 const CollectionPage = () => {
+  const {getAllProducts} = productApi;
   const navigate = useNavigate();
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<number[]>([0, 50]);
-  const [sortBy, setSortBy] = useState("featured");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
+  const [sortBy, setSortBy] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [loading, setLoading] = useState(false);
+  // Fetch products (in real app, fetch from API)
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await getAllProducts(page, pageSize);
+      setAllProducts(response.data.products);
+      setPage(response.data.currentPage);
+      setTotalItems(response.data.totalItems);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    }
+    finally {      
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchProducts();
+  }, [page, pageSize]);
 
   // Get unique values for filters
   const categories = Array.from(new Set(allProducts.map(p => p.category)));
@@ -230,14 +95,16 @@ const CollectionPage = () => {
     filteredProducts = [...filteredProducts].sort((a, b) => b.rating - a.rating);
   } else if (sortBy === "newest") {
     filteredProducts = [...filteredProducts].filter(p => p.badge === "New");
+  }else if (sortBy === "featured") {
+    filteredProducts = [...filteredProducts].filter(p => p.badge === "Featured");
+  }
+  else {
+    // "all" or default
+    filteredProducts = [...filteredProducts];
   }
 
   // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
 
   const toggleFilter = (value: string, filterArray: string[], setFilter: (arr: string[]) => void) => {
     if (filterArray.includes(value)) {
@@ -345,8 +212,8 @@ const CollectionPage = () => {
       <div>
         <h3 className="text-gray-900 mb-4">Material</h3>
         <div className="space-y-3">
-          {materials.map(material => (
-            <div key={material} className="flex items-center">
+          {materials.map((material, index) => (
+            <div key={`${material}-${index}`} className="flex items-center">
               <Checkbox
                 id={`mat-${material}`}
                 checked={selectedMaterials.includes(material)}
@@ -451,6 +318,7 @@ const CollectionPage = () => {
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
                   <SelectItem value="featured">Featured</SelectItem>
                   <SelectItem value="newest">Newest</SelectItem>
                   <SelectItem value="price-low">Price: Low to High</SelectItem>
@@ -503,7 +371,12 @@ const CollectionPage = () => {
             )}
 
             {/* Products Grid */}
-            {paginatedProducts.length === 0 ? (
+            {loading ? (
+              <div className="flex justify-center items-center py-16">
+              <Spinner size={48} color="blue" />
+              </div>
+            ) : 
+            (filteredProducts.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-gray-500 text-lg">No products found matching your filters.</p>
                 <Button onClick={clearAllFilters} variant="outline" className="mt-4">
@@ -513,12 +386,12 @@ const CollectionPage = () => {
             ) : (
               <>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {paginatedProducts.map((product) => (
-                    <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all" >
+                  {filteredProducts.map((product, index) => (
+                    <Card key={product._id} className="group overflow-hidden hover:shadow-xl transition-all" >
                       <div className="relative aspect-square overflow-hidden bg-gray-100">
                         <img
-                          src={product.image}
-                          alt={product.name}
+                          src={product.images[0]}
+                          alt={product.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
 
@@ -548,8 +421,8 @@ const CollectionPage = () => {
 
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-center justify-between">
-                        <h3 className="text-gray-900 font-medium">{product.name}</h3>
-                        <Link to={`/products/${product.id}`}>
+                        <h3 className="text-gray-900 font-medium">{product.title}</h3>
+                        <Link to={`/products/${product._id}`}>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -578,12 +451,12 @@ const CollectionPage = () => {
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-gray-900">${product.price}</span>
-                            {product.originalPrice && (
+                            <span className="text-gray-900">PKR{product.price}</span>
+                            {/* {product.originalPrice && (
                               <span className="text-gray-500 line-through">
                                 ${product.originalPrice}
                               </span>
-                            )}
+                            )} */}
                           </div>
                         </div>
                       </CardContent>
@@ -596,32 +469,32 @@ const CollectionPage = () => {
                   <div className="flex justify-center gap-2 mt-12">
                     <Button
                       variant="outline"
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
                     >
                       Previous
                     </Button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    {Array.from({ length: Math.ceil(totalItems / pageSize) }, (_, i) => i + 1).map((pageNumber) => (
                       <Button
-                        key={page}
-                        variant={currentPage === page ? "default" : "outline"}
-                        onClick={() => setCurrentPage(page)}
-                        className={currentPage === page ? "bg-purple-600 hover:bg-purple-700" : ""}
+                        key={pageNumber}
+                        variant={page === pageNumber ? "default" : "outline"}
+                        onClick={() => setPage(pageNumber)}
+                        className={page === pageNumber ? "bg-purple-600 hover:bg-purple-700" : ""}
                       >
-                        {page}
+                        {pageNumber}
                       </Button>
                     ))}
                     <Button
                       variant="outline"
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
                     >
                       Next
                     </Button>
                   </div>
                 )}
               </>
-            )}
+            ))}
           </div>
         </div>
       </div>

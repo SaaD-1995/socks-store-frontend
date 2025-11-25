@@ -9,70 +9,106 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
 import "./home.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import sliderApi from "../../api/silderApi";
+import HeroSectionSkeleton from "./skeleton/HeroSection";
+interface Slide {
+  id: string;
+  title: string;
+  subTitle: string;
+  description: string;
+  image: string;
+  bgGradient: string;
+  buttonText: string;
+  badge: string;
+}
 
-const slides = [
-  {
-    id: 1,
-    title: "Step Into Comfort & Style",
-    subtitle: "New Collection 2025",
-    description:
-      "Discover our premium collection of socks designed for every occasion. From athletic performance to everyday comfort.",
-    image:
-      "https://images.unsplash.com/photo-1651223658914-efd50e3da48e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-    gradient: "from-purple-600 via-pink-600 to-blue-600",
-    bgGradient: "from-purple-50 via-pink-50 to-blue-50",
-    buttonText: "View Collection",
-    badge: "Free Shipping Over $50",
-  },
-  {
-    id: 2,
-    title: "Performance Meets Style",
-    subtitle: "Athletic Collection",
-    description:
-      "Engineered for athletes and active lifestyles. Maximum comfort, breathability, and durability in every step.",
-    image:
-      "https://images.unsplash.com/photo-1760177379331-a8b4311db4a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-    gradient: "from-orange-600 via-red-600 to-pink-600",
-    bgGradient: "from-orange-50 via-red-50 to-pink-50",
-    buttonText: "View Sports Socks",
-    badge: "Enhanced Performance",
-  },
-  {
-    id: 3,
-    title: "Cozy Winter Essentials",
-    subtitle: "Winter Warmth",
-    description:
-      "Snuggle up with our ultra-soft, warm socks perfect for cold days. Luxury comfort for your feet.",
-    image:
-      "https://images.unsplash.com/photo-1731936757627-f2a1ea5893e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-    gradient: "from-blue-600 via-cyan-600 to-teal-600",
-    bgGradient: "from-blue-50 via-cyan-50 to-teal-50",
-    buttonText: "View Winter Socks",
-    badge: "Premium Materials",
-  },
-  {
-    id: 4,
-    title: "Express Your Style",
-    subtitle: "Fashion Forward",
-    description:
-      "Bold patterns, vibrant colors, and unique designs. Make a statement with every outfit.",
-    image:
-      "https://images.unsplash.com/photo-1597194536284-140766201107?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-    gradient: "from-violet-600 via-purple-600 to-fuchsia-600",
-    bgGradient: "from-violet-50 via-purple-50 to-fuchsia-50",
-    buttonText: "View Collection",
-    badge: "Limited Edition",
-  },
-];
+// const slides = [
+//   {
+//     id: 1,
+//     title: "Step Into Comfort & Style",
+//     subtitle: "New Collection 2025",
+//     description:
+//       "Discover our premium collection of socks designed for every occasion. From athletic performance to everyday comfort.",
+//     image:
+//       "https://images.unsplash.com/photo-1651223658914-efd50e3da48e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+//     gradient: "from-purple-600 via-pink-600 to-blue-600",
+//     bgGradient: "from-purple-50 via-pink-50 to-blue-50",
+//     buttonText: "View Collection",
+//     badge: "Free Shipping Over $50",
+//   },
+//   {
+//     id: 2,
+//     title: "Performance Meets Style",
+//     subtitle: "Athletic Collection",
+//     description:
+//       "Engineered for athletes and active lifestyles. Maximum comfort, breathability, and durability in every step.",
+//     image:
+//       "https://images.unsplash.com/photo-1760177379331-a8b4311db4a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+//     gradient: "from-orange-600 via-red-600 to-pink-600",
+//     bgGradient: "from-orange-50 via-red-50 to-pink-50",
+//     buttonText: "View Sports Socks",
+//     badge: "Enhanced Performance",
+//   },
+//   {
+//     id: 3,
+//     title: "Cozy Winter Essentials",
+//     subtitle: "Winter Warmth",
+//     description:
+//       "Snuggle up with our ultra-soft, warm socks perfect for cold days. Luxury comfort for your feet.",
+//     image:
+//       "https://images.unsplash.com/photo-1731936757627-f2a1ea5893e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+//     gradient: "from-blue-600 via-cyan-600 to-teal-600",
+//     bgGradient: "from-blue-50 via-cyan-50 to-teal-50",
+//     buttonText: "View Winter Socks",
+//     badge: "Premium Materials",
+//   },
+//   {
+//     id: 4,
+//     title: "Express Your Style",
+//     subtitle: "Fashion Forward",
+//     description:
+//       "Bold patterns, vibrant colors, and unique designs. Make a statement with every outfit.",
+//     image:
+//       "https://images.unsplash.com/photo-1597194536284-140766201107?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+//     gradient: "from-violet-600 via-purple-600 to-fuchsia-600",
+//     bgGradient: "from-violet-50 via-purple-50 to-fuchsia-50",
+//     buttonText: "View Collection",
+//     badge: "Limited Edition",
+//   },
+// ];
 
 export default function HeroSection() {
+  const {getAllSliders} = sliderApi;
+  const [slides, setSlides] = useState<Slide[]>([])
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  // function to fetch slides from API
+  const fetchSlides = async () => {
+    try {
+      const response = await getAllSliders();
+      setSlides(response.data);
+      console.log("Fetched slides:", response.data);
+    } catch (error) {
+      console.error("Error fetching slides:", error);
+    }
+  };
+  
 
+  // fetch slides on component mount
+  React.useEffect(() => {
+    fetchSlides();
+  }, []);
   return (
     <section className="relative overflow-hidden">
+      {slides.length === 0 ? (
+          <div className="flex items-center justify-center h-[90vh] bg-[#e6e6e6]">
+            {/* <p className="text-gray-500 text-lg">Loading slides...</p> */}
+           <HeroSectionSkeleton />
+          </div>
+        )
+      : (
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
         pagination={{ clickable: true }}
@@ -91,17 +127,18 @@ export default function HeroSection() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -50 }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className={`relative md:pt-0  py-9 bg-gradient-to-br ${slide.bgGradient} h-full flex flex-col md:flex-row items-center justify-center gap-10 px-6 md:px-20`}
+                  className={`relative md:pt-0  py-9 bg-[#e6e6e6] h-full flex flex-col md:flex-row items-center justify-center gap-10 px-6 md:px-20`}
                 >
                   {/* Content */}
-                  <div className="max-w-lg space-y-5">
+                  <div className="w-[600px] space-y-5">
                     <motion.span
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className={`px-4 py-2 bg-gradient-to-r ${slide.gradient} text-white rounded-full text-sm shadow-md`}
-                    >
-                      {slide.subtitle}
+                      // className={`px-4 py-2 bg-gradient-to-r ${slide.gradient} text-white rounded-full text-sm shadow-md`}
+                      className="px-4 py-2 bg-black-900 text-white rounded-full text-sm shadow-md"
+                    > 
+                      {slide.subTitle}
                     </motion.span>
 
                     <motion.h1
@@ -130,7 +167,7 @@ export default function HeroSection() {
                     >
                       <button
                         onClick={() => navigate(`/collections`)}
-                        className={`bg-gradient-to-r ${slide.gradient} hover:opacity-90 transition-all shadow-md w-auto flex items-center text-white px-5 py-3 rounded-lg font-semibold`}
+                        className={`bg-black-900 hover:opacity-90 transition-all shadow-md w-auto flex items-center text-white px-5 py-3 rounded-lg font-semibold`}
                       >
                         {slide.buttonText}
                         <ArrowRightIcon className="ml-2 h-4 w-4" />
@@ -156,15 +193,15 @@ export default function HeroSection() {
                       className="w-full h-[400px] object-cover"
                     />
                     <div
-                      className={`absolute inset-0 bg-gradient-to-t ${slide.gradient} opacity-20`}
+                      className={`absolute inset-0 bg-white opacity-20`}
                     />
-                    <div className="absolute bottom-4 left-4 bg-white rounded-xl p-3 shadow-xl">
+                    <div className="absolute bottom-4 left-4 bg-black-900 rounded-xl p-3 shadow-xl">
                       <p
-                        className={`text-sm font-semibold bg-gradient-to-r ${slide.gradient} bg-clip-text text-transparent`}
+                        className={`text-sm font-semibold text-white bg-clip-text text-transparent`}
                       >
                         {slide.badge}
                       </p>
-                      <p className="text-xs text-gray-600">Special Offer</p>
+                      <p className="text-xs text-white">Special Offer</p>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -173,6 +210,7 @@ export default function HeroSection() {
           </SwiperSlide>
         ))}
       </Swiper>
+      )}
     </section>
   );
 }
