@@ -1,4 +1,4 @@
-import { useEffect, useState} from "react";
+import { useEffect, useState, useCallback} from "react";
 import debounce from "lodash.debounce";
 import { motion } from "motion/react";
 import { Plus, Pencil, Trash2, Search, Filter, ChevronRight, ChevronLeft } from "lucide-react";
@@ -19,9 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import productApi from "../../api/productApi";
 import Spinner from "../../ui/Spinner";
+import ReactSelect from "react-select";
 
 type SocksType = "male" | "female" | "kids";
 interface Product {
@@ -34,6 +35,10 @@ interface Product {
   status: boolean;
   socksType: SocksType;
   description: string;
+  isFeatured: boolean;
+  badge: string;
+  sizes: string[];
+  
 }
 
 export function AdminProducts() {
@@ -41,12 +46,9 @@ export function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [totalItems, setTotalItems] = useState(0);
-  useEffect(() => {
-    fetchProducts();
-  }, [page, pageSize]);
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const response = await getAllProducts(page, pageSize);
@@ -60,8 +62,11 @@ export function AdminProducts() {
     finally {
       setLoading(false);
     }
-  };
-   const [formData, setFormData] = useState({
+  }, [page, pageSize]);
+    useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+  const [formData, setFormData] = useState({
     title: "",
     category: "Casual",
     price: "",  
@@ -69,7 +74,10 @@ export function AdminProducts() {
     image: "",
     description: "",
     status: true ? "Active" : "Draft",
-    socksType: "Male" as "Male" | "Female" | "Kids"
+    socksType: "Male" as "Male" | "Female" | "Kids",
+    isFeatured: false,
+    badge: "",
+    sizes: [] as string[],
   });
   // const socksType = ["Male", "Female", "Kids"];
   const categories =  [
@@ -120,7 +128,9 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
               price: formData.price ? parseFloat(formData.price) : p.price, 
               stock: formData.stock ? parseInt(formData.stock) : p.stock,
               socksType: formData.socksType === "Male" ? "male" : formData.socksType === "Female" ? "female" : "kids",
-              status: formData.status === "Active" ? true : false
+              status: formData.status === "Active" ? true : false,
+              isFeatured : formData.isFeatured,
+              sizes: formData.sizes,
             }
           : p
       ));
@@ -134,39 +144,42 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
         description: formData.description,
         status: formData.status === "Active" ? true : false,
         socksType: formData.socksType === "Male" ? "male" : formData.socksType === "Female" ? "female" : "kids",
-        images: formData.image ? [formData.image] : [""]
+        images: formData.image ? [formData.image] : [""],
+        isFeatured: formData.isFeatured,
+        badge: formData.badge,
+        sizes: formData.sizes,
       };
       const response = await updateProduct(editingProduct._id, updatedProduct);
       if (response && response.data) {
         setProducts(products.map(p => p._id === editingProduct._id ? response.data : p));
       }
-      alert('Product updated successfully!');
       toast.success("Product updated successfully!");
     } else {
       // Add new product
       const newProduct: Omit<Product, "_id"> = {
         title: formData.title,
         category: formData.category,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock),
+        price: formData.price ? parseFloat(formData.price) : 0,
+        stock: formData.stock ? parseInt(formData.stock) : 0,
         images: formData.image ? [formData.image] : [""],
         status: formData.status === "Active" ? true : false,
         description: formData.description,
-        socksType: (formData.socksType as string).toLowerCase() as SocksType 
+        socksType: (formData.socksType as string).toLowerCase() as SocksType ,
+        isFeatured:formData.isFeatured,
+        badge: formData.badge,
+        sizes: formData.sizes,
       };
       const response = await createProduct(newProduct);
       if (response && response.data) {
        try {
         setProducts([...products, response.data]);
+        toast.success("Product added successfully!");
+        fetchProducts();
        } catch (error) {
-        console.error("Failed to add product:", error);
+        toast.error("Failed to add product");
        }
       }
-      toast.success("Product added successfully!");
-      alert('Product created successfully!');
-      fetchProducts();
     }
-    
     resetForm();
     setDialogOpen(false);
   };
@@ -181,6 +194,9 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
       image: product.images[0] || "",
       description: product.description,
       status: product.status === true ? "Active" : "Draft", 
+      isFeatured: product.isFeatured,
+      badge: product.badge,
+      sizes: product.sizes,
       socksType: product.socksType === "male" ? "Male" : product.socksType === "female" ? "Female" : "Kids"
     });
     setDialogOpen(true);
@@ -201,7 +217,10 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
       image: "",
       description: "",
       status: "Active",
-      socksType: "Male"
+      socksType: "Male",
+      isFeatured: false,
+      badge: "",
+      sizes: [],
     });
     setEditingProduct(null);
   };
@@ -213,6 +232,19 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
     setPage((prev) => prev + 1);
     fetchProducts();
   }
+  const getStatusColor = (isFeatured: boolean) => {
+  if (isFeatured) {
+    return "bg-green-100 text-green-700"; // Yes
+  }
+  return "bg-red-100 text-red-700"; // No
+};
+const sizeOptions = [
+  { value: "S", label: "Small" },
+  { value: "M", label: "Medium" },
+  { value: "L", label: "Large" },
+  { value: "XL", label: "Extra Large" },
+  { value: "XXL", label: "XXL" },
+];
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -249,6 +281,21 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                     required
                     className="mt-1.5 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-purple-600 focus:ring-purple-600"
                   />
+                </div>
+                <div className="col-span-2">
+                  <label htmlFor="featured">Featured Product</label>
+                   <Select 
+                      value={formData.isFeatured ? "yes" : "no"}
+                      onValueChange={(value) => setFormData({ ...formData, isFeatured: value === "yes" })}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="yes">Yes</SelectItem>
+                        <SelectItem value="no">No</SelectItem>
+                      </SelectContent>
+                    </Select>
                 </div>
                 <div className="col-span-2">
                   <label htmlFor="socksType">Type</label>
@@ -333,7 +380,35 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                     className="mt-1.5 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-purple-600 focus:ring-purple-600"
                   />
                 </div>
-
+                <div className="md:col-span-2 col-span-2">
+                  <label htmlFor="sizes">Sizes</label>
+                    <ReactSelect
+                      isMulti
+                      options={sizeOptions}
+                      value={(formData.sizes || []).map(size => ({
+                        value: size,
+                        label: sizeOptions.find(option => option.value === size)?.label || size,
+                      }))}
+                      onChange={(selected: any) =>
+                        setFormData({
+                          ...formData,
+                          sizes: selected ? selected.map((item: any) => item.value) : [],
+                        })
+                      }
+                    />
+                </div>
+                {formData.isFeatured && (
+                <div className="md:col-span-2 col-span-2">
+                  <label htmlFor="badge">Badge</label>
+                  <input
+                    id="badge"
+                    value={formData.badge}
+                    onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
+                    placeholder="Enter badge text"
+                    className="mt-1.5 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-purple-600 focus:ring-purple-600"
+                  />
+                </div>
+                )}
                 <div className="md:col-span-2 col-span-2">
                   <label htmlFor="description">Description</label>
                   <textarea
@@ -407,6 +482,7 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                               <th scope="col" className="py-1 text-start font-medium">Price</th>
                               <th scope="col" className="py-1 text-start font-medium">Stock</th>
                               <th scope="col" className="py-1 text-start font-medium">Status</th>
+                              <th scope="col" className="py-1 text-start font-medium">Featured</th>
                               <th scope="col" className="text-right font-medium">Actions</th>
                             </tr>
                           </thead>
@@ -450,6 +526,11 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                                 <td className="p-3 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">
                                     <Badge variant={product.status === true ? "default" : "secondary"}>
                                       {product.status === true ? "Active" : "Inactive"}
+                                    </Badge>
+                                </td>
+                                <td className="p-3 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">
+                                    <Badge className={getStatusColor(product.isFeatured)}>
+                                      {product.isFeatured ? "Yes" : "No"}
                                     </Badge>
                                 </td>
                                 <td className="p-3 whitespace-nowrap text-end text-sm font-medium">
@@ -505,9 +586,10 @@ const getCategoriesByUser = (socksType: "Male" | "Female" | "Kids") => {
                         {Array.from({ length: Math.ceil(totalItems / pageSize) }, (_, i) => i + 1).map((pageNumber) => (
                           <Button 
                             variant={pageNumber === page ? "outline" : "ghost"}
-                            key={pageNumber}>
+                            key={pageNumber}
+                            onClick={() => setPage(pageNumber)}
+                            >
                             <span
-                              onClick={() => setPage(pageNumber)}
                               className={`flex justify-center items-center  ${pageNumber === page ? 'active' : ''}`}
                             >
                               {pageNumber}

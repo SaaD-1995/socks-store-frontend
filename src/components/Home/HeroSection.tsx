@@ -9,7 +9,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
 import "./home.css";
-import React, { useState, useEffect } from "react";
+import React, {  useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import sliderApi from "../../api/silderApi";
 import HeroSectionSkeleton from "./skeleton/HeroSection";
@@ -95,11 +95,10 @@ export default function HeroSection() {
     }
   };
   
-
   // fetch slides on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSlides();
-  }, []);
+  }, [fetchSlides]);
   return (
     <section className="relative overflow-hidden">
       {slides.length === 0 ? (

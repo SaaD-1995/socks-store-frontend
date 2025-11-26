@@ -1,4 +1,4 @@
-import { update } from "lodash";
+
 import axiosClient from "./axiosClient";
 const sliderApi = {
     getAllSliders: () => axiosClient.get("/sliders"),

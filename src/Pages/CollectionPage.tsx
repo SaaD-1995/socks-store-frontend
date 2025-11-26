@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "../ui/card";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
@@ -9,15 +8,13 @@ import { Slider } from "../ui/silder";
 import { Checkbox } from "../ui/checkbox";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Heart, ShoppingCart, Star, SlidersHorizontal, X, Home, Eye } from "lucide-react";
+import { SlidersHorizontal, X, Home } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { ScrollArea } from "../ui/scroll-area";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import productApi from '../api/productApi';
-import { set } from "lodash";
 import Spinner from "../ui/Spinner";
+import { toast } from "react-toastify";
+import ProductCard from "../components/products/ProductCard";
 
 interface Product {
   _id: string;
@@ -25,9 +22,9 @@ interface Product {
   price: number;
   originalPrice?: number;
   images: string[];
-  rating: number;
-  reviews: number;
-  badge?: string;
+  rating?: number;
+  // reviews: number;
+  badge: string;
   colors: string[];
   sizes: string[];
   category: string;
@@ -37,8 +34,9 @@ interface Product {
 
 const CollectionPage = () => {
   const {getAllProducts} = productApi;
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  // const [cart, setCart] = useState<Product[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
@@ -46,28 +44,28 @@ const CollectionPage = () => {
   const [priceRange, setPriceRange] = useState<number[]>([0, 50]);
   const [sortBy, setSortBy] = useState("all");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
   // Fetch products (in real app, fetch from API)
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const response = await getAllProducts(page, pageSize);
       setAllProducts(response.data.products);
       setPage(response.data.currentPage);
       setTotalItems(response.data.totalItems);
-      console.log(response.data);
+      console.log(response.data.products);
     } catch (error) {
       console.error("Failed to fetch products:", error);
     }
     finally {      
       setLoading(false);
     }
-  };
+  }, [getAllProducts, page, pageSize]);
   useEffect(() => {
     fetchProducts();
-  }, [page, pageSize]);
+  }, [fetchProducts]);
 
   // Get unique values for filters
   const categories = Array.from(new Set(allProducts.map(p => p.category)));
@@ -85,14 +83,14 @@ const CollectionPage = () => {
 
     return categoryMatch && colorMatch && sizeMatch && materialMatch && priceMatch;
   });
-
+  console.log("Filtered Products:", filteredProducts);
   // Sort products
   if (sortBy === "price-low") {
     filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
   } else if (sortBy === "price-high") {
     filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
   } else if (sortBy === "rating") {
-    filteredProducts = [...filteredProducts].sort((a, b) => b.rating - a.rating);
+    filteredProducts = [...filteredProducts].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
   } else if (sortBy === "newest") {
     filteredProducts = [...filteredProducts].filter(p => p.badge === "New");
   }else if (sortBy === "featured") {
@@ -101,10 +99,11 @@ const CollectionPage = () => {
   else {
     // "all" or default
     filteredProducts = [...filteredProducts];
+    console.log("All products shown");
   }
 
   // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+  const totalPages = Math.ceil(allProducts.length / pageSize);
 
   const toggleFilter = (value: string, filterArray: string[], setFilter: (arr: string[]) => void) => {
     if (filterArray.includes(value)) {
@@ -228,6 +227,11 @@ const CollectionPage = () => {
       </div>
     </div>
   );
+const addToCart = (product: any) => {
+  // Show toast when product is added to cart — accept any shape to match ProductCard's product type
+  toast.success(`${product.name ?? product.title} added to cart!`);
+};
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -376,7 +380,7 @@ const CollectionPage = () => {
               <Spinner size={48} color="blue" />
               </div>
             ) : 
-            (filteredProducts.length === 0 ? (
+            (allProducts.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-gray-500 text-lg">No products found matching your filters.</p>
                 <Button onClick={clearAllFilters} variant="outline" className="mt-4">
@@ -386,113 +390,62 @@ const CollectionPage = () => {
             ) : (
               <>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredProducts.map((product, index) => (
-                    <Card key={product._id} className="group overflow-hidden hover:shadow-xl transition-all" >
-                      <div className="relative aspect-square overflow-hidden bg-gray-100">
-                        <img
-                          src={product.images[0]}
-                          alt={product.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-
-                        {product.badge && (
-                          <Badge className="absolute top-4 left-4 bg-purple-600">
-                            {product.badge}
-                          </Badge>
-                        )}
-
-                        <Button
-                          size="icon"
-                          variant="secondary"
-                          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Heart className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-purple-600 hover:bg-purple-700"
-                          onClick={() => {}}
-                        >
-                          {/* onAddToCart(product) */}
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Add to Cart
-                        </Button>
-                      </div>
-
-                      <CardContent className="p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                        <h3 className="text-gray-900 font-medium">{product.title}</h3>
-                        <Link to={`/products/${product._id}`}>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="text-gray-600 hover:text-gray-800 text-sm transition-all duration-300">
-                                  <Eye className="h-4 w-4 inline-block mr-1" />
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                View Details
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </Link>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="ml-1 text-gray-700">{product.rating}</span>
-                          </div>
-                          <span className="text-gray-500">({product.reviews})</span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-600">{product.colors.length} colors</span>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-900">PKR{product.price}</span>
-                            {/* {product.originalPrice && (
-                              <span className="text-gray-500 line-through">
-                                ${product.originalPrice}
-                              </span>
-                            )} */}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                  {allProducts.map((product, index) => (
+                   <ProductCard 
+                    key={product._id}
+                    product={{
+                        _id: product._id,
+                        title: product.title,
+                        images: product.images,
+                        price: product.price,
+                        rating: product.rating ?? 0,
+                        // ProductCard expects `reviews` and `materials` (plural),
+                        // map from our product payload to those fields:
+                        reviews: (product as any).reviews ?? 0,
+                        originalPrice: product.originalPrice,
+                        badge: product.badge ?? undefined,
+                        colors: product.colors ?? undefined,
+                        materials: product.material ? [product.material] : undefined,
+                    }}
+                    index={index}
+                    />
                   ))}
                 </div>
 
                 {/* Pagination */}
-                {totalPages > 1 && (
+                {/* {totalPages > 1 && ( */}
                   <div className="flex justify-center gap-2 mt-12">
                     <Button
                       variant="outline"
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                       disabled={page === 1}
                     >
                       Previous
                     </Button>
-                    {Array.from({ length: Math.ceil(totalItems / pageSize) }, (_, i) => i + 1).map((pageNumber) => (
-                      <Button
-                        key={pageNumber}
-                        variant={page === pageNumber ? "default" : "outline"}
-                        onClick={() => setPage(pageNumber)}
-                        className={page === pageNumber ? "bg-purple-600 hover:bg-purple-700" : ""}
-                      >
-                        {pageNumber}
-                      </Button>
-                    ))}
+                   <div className="flex items-center space-x-1 [&>.active]:bg-gray-100 dark:[&>.active]:bg-neutral-700">
+                        {Array.from({ length: Math.ceil(totalItems / pageSize) }, (_, i) => i + 1).map((pageNumber) => (
+                          <Button 
+                            variant={pageNumber === page ? "outline" : "ghost"}
+                            key={pageNumber}
+                            onClick={() => setPage(pageNumber)}
+                            >
+                            <span
+                              className={`flex justify-center items-center  ${pageNumber === page ? 'active' : ''}`}
+                            >
+                              {pageNumber}
+                            </span>
+                          </Button>
+                        ))}
+                      </div>
                     <Button
                       variant="outline"
-                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
+                      onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                      disabled={page >= Math.ceil(totalItems / pageSize)}
                     >
                       Next
                     </Button>
                   </div>
-                )}
+                {/* )} */}
               </>
             ))}
           </div>

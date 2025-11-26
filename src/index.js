@@ -8,12 +8,15 @@ import "./index.css";
 import ScrollToTop from "./components/ScrollToTop";
 import store from "./redux/store";
 import { AuthProvider } from "./context/AuthContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 ReactDOM.createRoot(document.getElementById("root")).render(
   // <React.StrictMode>
     <BrowserRouter>
     <AuthProvider store={store}>
       <ScrollToTop />
       <App />
+      <ToastContainer />
     </AuthProvider>
     </BrowserRouter>
   // </React.StrictMode>
